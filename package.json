@@ -1,0 +1,39 @@
+{
+	"name": "clinq-bridge-google-contacts",
+	"version": "1.0.0",
+	"description": "CLINQ Bridge for Google Contacts.",
+	"main": "dist/index.js",
+	"repository": "git@github.com:fgladisch/clinq-bridge-google-contacts.git",
+	"contributors": [
+		{
+			"name": "Benjamin Kluck",
+			"email": "ben@fug.lu"
+		},
+		{
+			"name": "Felix Gladisch",
+			"email": "felix@felixgladisch.de"
+		}
+	],
+	"license": "Apache-2.0",
+	"scripts": {
+		"start": "yarn compile && node dist/index",
+		"watch": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+		"compile": "./node_modules/typescript/bin/tsc"
+	},
+	"engines": {
+		"node": "^8 || ^9",
+		"yarn": "^1.5"
+	},
+	"dependencies": {
+		"axios": "^0.18.0",
+		"clinq-crm-bridge": "^4.2.1",
+		"googleapis": "^28.0.1",
+		"typescript": "^2.7.2"
+	},
+	"devDependencies": {
+		"@types/express": "^4.11.1",
+		"@types/node": "^9.4.6",
+		"nodemon": "1.17.2",
+		"ts-node": "^5.0.0"
+	}
+}
