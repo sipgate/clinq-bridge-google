@@ -12,7 +12,7 @@ class GoogleContactsAdapter implements CrmAdapter {
 			refresh_token
 		});
 		const { credentials } = await client.refreshAccessToken();
-		const contacts: Contact[] = await getGoogleContacts(credentials.access_token);
+		const contacts = await getGoogleContacts(credentials.access_token);
 		return contacts;
 	}
 
