@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Contact, CrmAdapter, CrmConfig, start } from "clinq-crm-bridge";
 import { Request } from "express";
 import { getGoogleContacts, getOAuth2Client, getOAuth2RedirectUrl } from "./util";

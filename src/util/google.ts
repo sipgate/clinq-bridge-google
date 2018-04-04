@@ -5,11 +5,11 @@ import { google } from "googleapis";
 import queryString = require("querystring");
 import parseEnvironment from "./parse-environment";
 
-const { clientId, clientSecret, redirectUrl } = parseEnvironment();
-
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
 const GOOGLE_PEOPLE_CONNECTIONS_API = "https://people.googleapis.com/v1/people/me/connections";
 const RELEVANT_PHONE_NUMBER_TYPES = ["home", "work", "mobile"];
+
+const { clientId, clientSecret, redirectUrl } = parseEnvironment();
 
 export function getOAuth2Client(): OAuth2Client {
 	return new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
