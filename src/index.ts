@@ -1,8 +1,8 @@
-import { CrmAdapter, CrmConfig, Contact, start } from "clinq-crm-bridge";
-import { Request } from "express";
 import axios from "axios";
-import { google } from "googleapis";
+import { Contact, CrmAdapter, CrmConfig, start } from "clinq-crm-bridge";
 import { resolve } from "dns";
+import { Request } from "express";
+import { google } from "googleapis";
 import queryString = require("querystring");
 
 const OAuth2 = google.auth.OAuth2;
@@ -37,7 +37,7 @@ class GoogleContactsAdapter implements CrmAdapter {
 			personFields: ["names", "phoneNumbers"]
 		});
 		return axios(`${GOOGLE_PEOPLE_CONNECTIONS_API}?${query}`).then(res => {
-			console.log(JSON.stringify(res.data.connections, null, 2));
+			console.log(JSON.stringify(res.data.connections, null, 2)); // tslint:disable-line
 			const contacts = res.data.connections.map(connection => ({
 				name: connection.names[0].displayName,
 				phoneNumbers: connection.phoneNumbers
@@ -66,7 +66,7 @@ class GoogleContactsAdapter implements CrmAdapter {
 					reject(err);
 				}
 				const { access_token, refresh_token } = tokens;
-				console.log(`${access_token}:${refresh_token}`);
+				console.log(`${access_token}:${refresh_token}`); // tslint:disable-line
 				resolve({
 					apiKey: `${access_token}:${refresh_token}`,
 					apiUrl: ""
