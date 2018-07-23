@@ -8,6 +8,7 @@
 		"interface-name": false,
 		"quotemark": [true, "double"],
 		"variable-name": false,
-		"no-submodule-imports": false
+		"no-submodule-imports": false,
+		"no-console": false
 	}
 }

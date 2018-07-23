@@ -1,6 +1,18 @@
 import { Adapter, Config, Contact, start } from "@clinq/bridge";
 import { Request } from "express";
+import { OAuth2Client } from "google-auth-library";
 import { getGoogleContacts, getOAuth2Client, getOAuth2RedirectUrl } from "./util";
+
+const cache = new Map<string, Contact[]>();
+
+async function populateCache(client: OAuth2Client, apiKey: string): Promise<void> {
+	try {
+		const contacts = await getGoogleContacts(client);
+		cache.set(apiKey, contacts);
+	} catch (error) {
+		console.error(error.message);
+	}
+}
 
 class GoogleContactsAdapter implements Adapter {
 	public async getContacts(config: Config): Promise<Contact[]> {
@@ -11,7 +23,8 @@ class GoogleContactsAdapter implements Adapter {
 			refresh_token
 		});
 		await client.refreshAccessToken();
-		const contacts = await getGoogleContacts(client);
+		populateCache(client, config.apiKey);
+		const contacts = cache.get(config.apiKey) || [];
 		return contacts;
 	}
 

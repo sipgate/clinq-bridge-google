@@ -8,13 +8,11 @@ const { people } = google.people("v1");
 
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
 const RELEVANT_PHONE_NUMBER_TYPES = ["home", "work", "mobile"];
+const RESOURCE_NAME = "people/me";
+const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers";
+const PAGE_SIZE = 100;
 
 const { clientId, clientSecret, redirectUrl } = parseEnvironment();
-
-const resourceName = "people/me";
-const personFields = ["metadata", "names", "emailAddresses", "organizations", "phoneNumbers"].join(
-	","
-);
 
 interface PhoneNumber {
 	label: string | null;
@@ -33,20 +31,31 @@ export function getOAuth2RedirectUrl(): string {
 	});
 }
 
-export async function getGoogleContacts(client: OAuth2Client): Promise<Contact[]> {
-	const response = await people.connections.list({
+export async function getGoogleContacts(
+	client: OAuth2Client,
+	retrievedItems: number = 0,
+	token?: string,
+	previousContacts?: Contact[]
+): Promise<Contact[]> {
+	const params: people_v1.Params$Resource$People$Connections$List = {
 		auth: client,
-		personFields,
-		resourceName
-	});
+		pageToken: token,
+		personFields: PERSON_FIELDS,
+		resourceName: RESOURCE_NAME,
+		pageSize: PAGE_SIZE
+	};
 
-	const { connections } = response.data;
+	const response = await people.connections.list(params);
+
+	const { connections, nextPageToken, totalItems } = response.data;
 
 	if (!Array.isArray(connections)) {
 		return [];
 	}
 
-	const contacts: Contact[] = [];
+	retrievedItems = retrievedItems + connections.length;
+
+	const contacts: Contact[] = previousContacts || [];
 
 	for (const connection of connections) {
 		const id = getGoogleContactId(connection);
@@ -64,6 +73,12 @@ export async function getGoogleContacts(client: OAuth2Client): Promise<Contact[]
 				phoneNumbers
 			});
 		}
+	}
+
+	console.log(retrievedItems);
+
+	if (nextPageToken && totalItems && retrievedItems < totalItems) {
+		return getGoogleContacts(client, retrievedItems, nextPageToken, contacts);
 	}
 
 	return contacts;
