@@ -1,4 +1,4 @@
-import { Adapter, Config, Contact, start } from "@clinq/bridge";
+import { Adapter, Config, Contact, start, unauthorized } from "@clinq/bridge";
 import { Request } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { getGoogleContacts, getOAuth2Client, getOAuth2RedirectUrl } from "./util";
@@ -17,13 +17,17 @@ async function populateCache(client: OAuth2Client, apiKey: string): Promise<void
 class GoogleContactsAdapter implements Adapter {
 	public async getContacts(config: Config): Promise<Contact[]> {
 		const [access_token, refresh_token] = config.apiKey.split(":");
-		const client = getOAuth2Client();
-		client.setCredentials({
-			access_token,
-			refresh_token
-		});
-		await client.refreshAccessToken();
-		populateCache(client, config.apiKey);
+		try {
+			const client = getOAuth2Client();
+			client.setCredentials({
+				access_token,
+				refresh_token
+			});
+			await client.refreshAccessToken();
+			populateCache(client, config.apiKey);
+		} catch (error) {
+			unauthorized();
+		}
 		const contacts = cache.get(config.apiKey) || [];
 		return contacts;
 	}

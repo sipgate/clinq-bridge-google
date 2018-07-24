@@ -1,7 +1,6 @@
-import { Contact } from "@clinq/bridge";
+import { Contact, PhoneNumber } from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library/build/src/auth/oauth2client";
 import { google, people_v1 } from "googleapis";
-import { connect } from "net";
 import parseEnvironment from "./parse-environment";
 
 const { people } = google.people("v1");
@@ -13,11 +12,6 @@ const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers"
 const PAGE_SIZE = 100;
 
 const { clientId, clientSecret, redirectUrl } = parseEnvironment();
-
-interface PhoneNumber {
-	label: string | null;
-	phoneNumber: string;
-}
 
 export function getOAuth2Client(): OAuth2Client {
 	return new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
