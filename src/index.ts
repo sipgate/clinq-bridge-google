@@ -42,7 +42,6 @@ class GoogleContactsAdapter implements Adapter {
 			apiKey: `${access_token}:${refresh_token}`,
 			apiUrl: ""
 		};
-		console.log("Saving config:", config);
 		return config;
 	}
 }
