@@ -21,7 +21,8 @@ export function getOAuth2RedirectUrl(): string {
 	const client = getOAuth2Client();
 	return client.generateAuthUrl({
 		access_type: "offline",
-		scope: GOOGLE_CONTACTS_SCOPE
+		scope: GOOGLE_CONTACTS_SCOPE,
+		prompt: "consent"
 	});
 }
 
