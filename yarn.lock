@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@clinq/bridge@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-3.0.0.tgz#4c4e9aedda7ed1ef9c9619402a204187c4c0df3c"
+"@clinq/bridge@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-3.1.0.tgz#68aa3376c9f3b0180e2237b5d4eb67cf6add566d"
   dependencies:
     ajv "^6.1.1"
     axios "^0.18.0"
