@@ -38,10 +38,12 @@ class GoogleContactsAdapter implements Adapter {
 		const {
 			tokens: { access_token, refresh_token }
 		} = await client.getToken(code);
-		return {
+		const config: Config = {
 			apiKey: `${access_token}:${refresh_token}`,
 			apiUrl: ""
 		};
+		console.log("Saving config:", config);
+		return config;
 	}
 }
 
