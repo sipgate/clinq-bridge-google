@@ -70,8 +70,6 @@ export async function getGoogleContacts(
 		}
 	}
 
-	console.log(retrievedItems);
-
 	if (nextPageToken && totalItems && retrievedItems < totalItems) {
 		return getGoogleContacts(client, retrievedItems, nextPageToken, contacts);
 	}
