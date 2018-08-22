@@ -57,7 +57,7 @@ export async function getGoogleContacts(
 		const name = getGoogleContactName(connection);
 		const company = getGoogleContactCompany(connection);
 		const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
-		const email = getGoogleContactPrimraryEmailAddress(connection);
+		const email = getGoogleContactPrimaryEmailAddress(connection);
 		const phoneNumbers = getGoogleContactPhoneNumbers(connection);
 
 		if (id && name && phoneNumbers) {
@@ -138,7 +138,7 @@ export function getGoogleContactPhoneNumbers(
 	return phoneNumbers;
 }
 
-export function getGoogleContactPrimraryEmailAddress(
+export function getGoogleContactPrimaryEmailAddress(
 	connection: people_v1.Schema$Person
 ): string | null {
 	const { emailAddresses } = connection;
