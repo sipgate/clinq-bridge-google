@@ -56,6 +56,7 @@ export async function getGoogleContacts(
 		const id = getGoogleContactId(connection);
 		const name = getGoogleContactName(connection);
 		const company = getGoogleContactCompany(connection);
+		const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
 		const email = getGoogleContactPrimraryEmailAddress(connection);
 		const phoneNumbers = getGoogleContactPhoneNumbers(connection);
 
@@ -65,6 +66,8 @@ export async function getGoogleContacts(
 				name,
 				email,
 				company,
+				contactUrl,
+				avatarUrl: null,
 				phoneNumbers
 			});
 		}
