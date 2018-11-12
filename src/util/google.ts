@@ -8,7 +8,7 @@ const { people } = google.people("v1");
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
 const RELEVANT_PHONE_NUMBER_TYPES = ["home", "work", "mobile"];
 const RESOURCE_NAME = "people/me";
-const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers";
+const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
 const PAGE_SIZE = 100;
 
 const { clientId, clientSecret, redirectUrl } = parseEnvironment();
@@ -59,6 +59,7 @@ export async function getGoogleContacts(
 		const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
 		const email = getGoogleContactPrimaryEmailAddress(connection);
 		const phoneNumbers = getGoogleContactPhoneNumbers(connection);
+		const avatarUrl = getGoogleContactPhoto(connection);
 
 		if (id && name && phoneNumbers) {
 			contacts.push({
@@ -67,7 +68,7 @@ export async function getGoogleContacts(
 				email,
 				company,
 				contactUrl,
-				avatarUrl: null,
+				avatarUrl,
 				phoneNumbers
 			});
 		}
@@ -152,4 +153,18 @@ export function getGoogleContactPrimaryEmailAddress(
 		return null;
 	}
 	return primaryEmailAddress.value || null;
+}
+
+export function getGoogleContactPhoto(connection: people_v1.Schema$Person): string | null {
+	const { photos } = connection;
+	if (!photos) {
+		return null;
+	}
+
+	const photo = photos.find(entry => Boolean(entry.metadata && entry.metadata.primary));
+	if (!photo) {
+		return null;
+	}
+
+	return photo.url || null;
 }
