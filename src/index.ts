@@ -33,8 +33,9 @@ class GoogleContactsAdapter implements Adapter {
 		const cached = await this.cache.get(apiKey);
 		if (cached) {
 			console.log(`Returning ${cached.length} contacts for ${anonymizeKey(apiKey)}`);
+			return cached;
 		}
-		return cached || [];
+		return [];
 	}
 
 	public async getOAuth2RedirectUrl(): Promise<string> {
