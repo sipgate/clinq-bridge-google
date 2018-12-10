@@ -9,6 +9,7 @@
 	"license": "Apache-2.0",
 	"scripts": {
 		"postinstall": "tsc",
+		"compile": "tsc",
 		"start": "node dist/index",
 		"watch": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
 	},
@@ -16,7 +17,9 @@
 		"@clinq/bridge": "^5.1.1",
 		"@types/express": "^4.16.0",
 		"@types/node": "^10.12.9",
+		"@types/redis": "^2.8.8",
 		"googleapis": "^35.0.0",
+		"redis": "^2.8.0",
 		"typescript": "^3.1.6"
 	},
 	"devDependencies": {

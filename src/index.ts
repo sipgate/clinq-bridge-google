@@ -1,22 +1,24 @@
 import { Adapter, Config, Contact, start, unauthorized } from "@clinq/bridge";
 import { Request } from "express";
 import { OAuth2Client } from "google-auth-library";
+import { RedisCache } from "./cache";
 import { getGoogleContacts, getOAuth2Client, getOAuth2RedirectUrl } from "./util";
+import { anonymizeKey } from "./util/anonymize-key";
 
-const cache = new Map<string, Contact[]>();
-
-async function populateCache(client: OAuth2Client, apiKey: string): Promise<void> {
-	try {
-		const contacts = await getGoogleContacts(client);
-		cache.set(apiKey, contacts);
-	} catch (error) {
-		console.error(error.message);
-	}
-}
+const { REDIS_URL } = process.env;
 
 class GoogleContactsAdapter implements Adapter {
-	public async getContacts(config: Config): Promise<Contact[]> {
-		const [access_token, refresh_token] = config.apiKey.split(":");
+	private cache: RedisCache;
+
+	constructor() {
+		if (!REDIS_URL) {
+			throw new Error("Missing Redis URL in environment");
+		}
+		this.cache = new RedisCache(REDIS_URL);
+	}
+
+	public async getContacts({ apiKey }: Config): Promise<Contact[]> {
+		const [access_token, refresh_token] = apiKey.split(":");
 		try {
 			const client = getOAuth2Client();
 			client.setCredentials({
@@ -24,12 +26,15 @@ class GoogleContactsAdapter implements Adapter {
 				refresh_token
 			});
 			await client.refreshAccessToken();
-			populateCache(client, config.apiKey);
+			this.populateCache(client, apiKey);
 		} catch (error) {
 			unauthorized();
 		}
-		const contacts = cache.get(config.apiKey) || [];
-		return contacts;
+		const cached = await this.cache.get(apiKey);
+		if (cached) {
+			console.log(`Returning ${cached.length} contacts for ${anonymizeKey(apiKey)}`);
+		}
+		return cached || [];
 	}
 
 	public async getOAuth2RedirectUrl(): Promise<string> {
@@ -47,6 +52,15 @@ class GoogleContactsAdapter implements Adapter {
 			apiUrl: ""
 		};
 		return config;
+	}
+
+	private async populateCache(client: OAuth2Client, apiKey: string): Promise<void> {
+		try {
+			const contacts = await getGoogleContacts(client);
+			await this.cache.set(apiKey, contacts);
+		} catch (error) {
+			console.error(error.message);
+		}
 	}
 }
 
