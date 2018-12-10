@@ -29,7 +29,7 @@ class GoogleContactsAdapter implements Adapter {
 			if (!response.token) {
 				throw new Error("Unauthorized");
 			}
-			this.populateCache(client, response.token);
+			this.populateCache(client, apiKey);
 		} catch (error) {
 			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
 			unauthorized();
