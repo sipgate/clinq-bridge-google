@@ -3,7 +3,7 @@ import * as redis from "redis";
 import { anonymizeKey } from "../util/anonymize-key";
 import { PromiseRedisClient } from "./promise-redis-client";
 
-const CACHE_TTL = 60 * 60 * 24 * 30; // 1 Month
+const CACHE_TTL = 60 * 60 * 24 * 30; // 30 days
 
 export class RedisCache {
 	private client: PromiseRedisClient;
@@ -15,7 +15,7 @@ export class RedisCache {
 		this.client = new PromiseRedisClient(client);
 		console.log("Initialized Redis cache.");
 		client.on("error", error => {
-			console.warn("Redis error\n", error.message);
+			console.warn("Redis error: ", error.message);
 		});
 	}
 
