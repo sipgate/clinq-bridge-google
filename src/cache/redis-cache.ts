@@ -3,6 +3,8 @@ import * as redis from "redis";
 import { anonymizeKey } from "../util/anonymize-key";
 import { PromiseRedisClient } from "./promise-redis-client";
 
+const CACHE_TTL = 60 * 60 * 24 * 30; // 1 Month
+
 export class RedisCache {
 	private client: PromiseRedisClient;
 
@@ -35,6 +37,6 @@ export class RedisCache {
 	public async set(key: string, value: any): Promise<void> {
 		const stringified = JSON.stringify(value);
 		console.log(`Saving contacts for key "${anonymizeKey(key)}" to cache.`);
-		await this.client.set(key, stringified);
+		await this.client.set(key, stringified, "EX", CACHE_TTL);
 	}
 }
