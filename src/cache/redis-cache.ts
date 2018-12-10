@@ -22,19 +22,19 @@ export class RedisCache {
 		if (value) {
 			return JSON.parse(value) as Contact[];
 		} else {
-			console.log(`Found no match for ${anonymizeKey(key)} in cache.`);
+			console.log(`Found no match for key "${anonymizeKey(key)}" in cache.`);
 			return null;
 		}
 	}
 
 	public async delete(key: string): Promise<void> {
-		console.log(`Removing ${anonymizeKey(key)} from cache.`);
+		console.log(`Removing contacts for key "${anonymizeKey(key)}" from cache.`);
 		await this.client.del(key);
 	}
 
 	public async set(key: string, value: any): Promise<void> {
 		const stringified = JSON.stringify(value);
-		console.log(`Saving ${anonymizeKey(key)} to cache.`);
+		console.log(`Saving contacts for key "${anonymizeKey(key)}" to cache.`);
 		await this.client.set(key, stringified);
 	}
 }

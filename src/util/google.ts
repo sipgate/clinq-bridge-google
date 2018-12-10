@@ -1,5 +1,5 @@
 import { Contact, PhoneNumber } from "@clinq/bridge";
-import { OAuth2Client } from "google-auth-library/build/src/auth/oauth2client";
+import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 } from "googleapis";
 import parseEnvironment from "./parse-environment";
 

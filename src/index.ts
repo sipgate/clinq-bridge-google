@@ -25,14 +25,18 @@ class GoogleContactsAdapter implements Adapter {
 				access_token,
 				refresh_token
 			});
-			await client.refreshAccessToken();
-			this.populateCache(client, apiKey);
+			const response = await client.getAccessToken();
+			if (!response.token) {
+				throw new Error("Unauthorized");
+			}
+			this.populateCache(client, response.token);
 		} catch (error) {
+			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
 			unauthorized();
 		}
 		const cached = await this.cache.get(apiKey);
 		if (cached) {
-			console.log(`Returning ${cached.length} contacts for ${anonymizeKey(apiKey)}`);
+			console.log(`Returning ${cached.length} contacts for key "${anonymizeKey(apiKey)}".`);
 			return cached;
 		}
 		return [];
