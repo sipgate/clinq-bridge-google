@@ -6,7 +6,6 @@ import parseEnvironment from "./parse-environment";
 const { people } = google.people("v1");
 
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
-const RELEVANT_PHONE_NUMBER_TYPES = ["home", "work", "mobile"];
 const RESOURCE_NAME = "people/me";
 const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
 const PAGE_SIZE = 100;
@@ -121,11 +120,8 @@ export function getGoogleContactPhoneNumbers(
 	if (!connection.phoneNumbers) {
 		return null;
 	}
-	const relevantPhoneNumbers = connection.phoneNumbers.filter(
-		phoneNumber => phoneNumber.type && RELEVANT_PHONE_NUMBER_TYPES.indexOf(phoneNumber.type) >= 0
-	);
 	const phoneNumbers: PhoneNumber[] = [];
-	for (const phoneNumber of relevantPhoneNumbers) {
+	for (const phoneNumber of connection.phoneNumbers) {
 		if (phoneNumber.value) {
 			phoneNumbers.push({
 				label: phoneNumber.formattedType || null,
