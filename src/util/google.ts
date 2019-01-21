@@ -1,11 +1,12 @@
-import { Contact, PhoneNumber } from "@clinq/bridge";
+import { Contact, ContactTemplate, PhoneNumber } from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 } from "googleapis";
+import { ContactName } from "./contact-name.model";
 import parseEnvironment from "./parse-environment";
 
 const { people } = google.people("v1");
 
-const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts.readonly";
+const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts";
 const RESOURCE_NAME = "people/me";
 const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
 const PAGE_SIZE = 100;
@@ -16,6 +17,23 @@ export function getOAuth2Client(): OAuth2Client {
 	return new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
 }
 
+export async function getAuthorizedOAuth2Client(apiKey: string): Promise<OAuth2Client> {
+	if (typeof apiKey !== "string") {
+		throw new Error("Invalid API key.");
+	}
+	const [access_token, refresh_token] = apiKey.split(":");
+	const client = getOAuth2Client();
+	client.setCredentials({
+		access_token,
+		refresh_token
+	});
+	const response = await client.getAccessToken();
+	if (!response.token) {
+		throw new Error("Unauthorized");
+	}
+	return client;
+}
+
 export function getOAuth2RedirectUrl(): string {
 	const client = getOAuth2Client();
 	return client.generateAuthUrl({
@@ -23,6 +41,75 @@ export function getOAuth2RedirectUrl(): string {
 		scope: GOOGLE_CONTACTS_SCOPE,
 		prompt: "consent"
 	});
+}
+
+function convertGoogleContact(connection: people_v1.Schema$Person): Contact | null {
+	const id = getGoogleContactId(connection);
+	const contactName = getGoogleContactName(connection);
+	const company = getGoogleContactCompany(connection);
+	const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
+	const email = getGoogleContactPrimaryEmailAddress(connection);
+	const phoneNumbers = getGoogleContactPhoneNumbers(connection);
+	const avatarUrl = getGoogleContactPhoto(connection);
+
+	if (id && phoneNumbers && phoneNumbers.length > 0) {
+		return {
+			id,
+			name: null,
+			firstName: contactName ? contactName.firstName : null,
+			lastName: contactName ? contactName.lastName : null,
+			email,
+			company,
+			contactUrl,
+			avatarUrl,
+			phoneNumbers
+		};
+	}
+	return null;
+}
+
+export async function createGoogleContact(
+	client: OAuth2Client,
+	contact: ContactTemplate
+): Promise<Contact> {
+	const person: people_v1.Schema$Person = {};
+
+	const name: people_v1.Schema$Name = {};
+	if (contact.firstName) {
+		name.givenName = contact.firstName;
+	}
+	if (contact.lastName) {
+		name.familyName = contact.lastName;
+	}
+	person.names = [name];
+
+	if (contact.email) {
+		person.emailAddresses = [{ value: contact.email }];
+	}
+
+	person.phoneNumbers = contact.phoneNumbers.map(
+		(entry): people_v1.Schema$PhoneNumber => {
+			const phoneNumber: people_v1.Schema$PhoneNumber = {
+				value: entry.phoneNumber
+			};
+			if (entry.label) {
+				phoneNumber.type = entry.label;
+			}
+			return phoneNumber;
+		}
+	);
+
+	const params: people_v1.Params$Resource$People$Createcontact = {
+		auth: client,
+		requestBody: person
+	};
+
+	const response = await people.createContact(params);
+	const parsedContact = convertGoogleContact(response.data);
+	if (!parsedContact) {
+		throw new Error("Could not parse contact.");
+	}
+	return parsedContact;
 }
 
 export async function getGoogleContacts(
@@ -52,24 +139,10 @@ export async function getGoogleContacts(
 	const contacts: Contact[] = previousContacts || [];
 
 	for (const connection of connections) {
-		const id = getGoogleContactId(connection);
-		const name = getGoogleContactName(connection);
-		const company = getGoogleContactCompany(connection);
-		const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
-		const email = getGoogleContactPrimaryEmailAddress(connection);
-		const phoneNumbers = getGoogleContactPhoneNumbers(connection);
-		const avatarUrl = getGoogleContactPhoto(connection);
+		const contact = convertGoogleContact(connection);
 
-		if (id && name && phoneNumbers) {
-			contacts.push({
-				id,
-				name,
-				email,
-				company,
-				contactUrl,
-				avatarUrl,
-				phoneNumbers
-			});
+		if (contact) {
+			contacts.push(contact);
 		}
 	}
 
@@ -92,7 +165,7 @@ export function getGoogleContactId(connection: people_v1.Schema$Person): string 
 	return contactMetadata.id;
 }
 
-export function getGoogleContactName(connection: people_v1.Schema$Person): string | null {
+export function getGoogleContactName(connection: people_v1.Schema$Person): ContactName | null {
 	if (!connection.names) {
 		return null;
 	}
@@ -100,7 +173,10 @@ export function getGoogleContactName(connection: people_v1.Schema$Person): strin
 	if (!name) {
 		return null;
 	}
-	return name.displayName || null;
+	return {
+		firstName: name.givenName || null,
+		lastName: name.familyName || null
+	};
 }
 
 export function getGoogleContactCompany(connection: people_v1.Schema$Person): string | null {

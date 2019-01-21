@@ -1,8 +1,15 @@
 import { Adapter, Config, Contact, start, unauthorized } from "@clinq/bridge";
+import { ContactTemplate } from "@clinq/bridge/dist/models";
 import { Request } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { RedisCache } from "./cache";
-import { getGoogleContacts, getOAuth2Client, getOAuth2RedirectUrl } from "./util";
+import {
+	createGoogleContact,
+	getAuthorizedOAuth2Client,
+	getGoogleContacts,
+	getOAuth2Client,
+	getOAuth2RedirectUrl
+} from "./util";
 import { anonymizeKey } from "./util/anonymize-key";
 
 const { REDIS_URL } = process.env;
@@ -18,21 +25,12 @@ class GoogleContactsAdapter implements Adapter {
 	}
 
 	public async getContacts({ apiKey }: Config): Promise<Contact[]> {
-		const [access_token, refresh_token] = apiKey.split(":");
 		try {
-			const client = getOAuth2Client();
-			client.setCredentials({
-				access_token,
-				refresh_token
-			});
-			const response = await client.getAccessToken();
-			if (!response.token) {
-				throw new Error("Unauthorized");
-			}
+			const client = await getAuthorizedOAuth2Client(apiKey);
 			this.populateCache(client, apiKey);
 		} catch (error) {
 			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
-			unauthorized();
+			throw unauthorized();
 		}
 		const cached = await this.cache.get(apiKey);
 		if (cached) {
@@ -40,6 +38,17 @@ class GoogleContactsAdapter implements Adapter {
 			return cached;
 		}
 		return [];
+	}
+
+	public async createContact({ apiKey }: Config, contact: ContactTemplate): Promise<Contact> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			const createdContact = await createGoogleContact(client, contact);
+			return createdContact;
+		} catch (error) {
+			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
+			throw new Error("Could not create contact");
+		}
 	}
 
 	public async getOAuth2RedirectUrl(): Promise<string> {
