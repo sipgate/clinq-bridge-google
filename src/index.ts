@@ -1,4 +1,4 @@
-import { Adapter, Config, Contact, start, unauthorized } from "@clinq/bridge";
+import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
 import { ContactTemplate } from "@clinq/bridge/dist/models";
 import { Request } from "express";
 import { OAuth2Client } from "google-auth-library";
@@ -30,7 +30,7 @@ class GoogleContactsAdapter implements Adapter {
 			this.populateCache(client, apiKey);
 		} catch (error) {
 			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
-			throw unauthorized();
+			throw new ServerError(401, "Unauthorized");
 		}
 		const cached = await this.cache.get(apiKey);
 		if (cached) {
@@ -47,7 +47,7 @@ class GoogleContactsAdapter implements Adapter {
 			return createdContact;
 		} catch (error) {
 			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
-			throw new Error("Could not create contact");
+			throw new ServerError(400, "Could not create contact");
 		}
 	}
 
