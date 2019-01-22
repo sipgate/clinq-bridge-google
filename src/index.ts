@@ -88,8 +88,8 @@ class GoogleContactsAdapter implements Adapter {
 			const cached = await this.cache.get(apiKey);
 
 			if (cached) {
-				const filteredCache = cached.filter(entry => entry.id !== id);
-				await this.cache.set(apiKey, filteredCache);
+				const updatedCache = cached.filter(entry => entry.id !== id);
+				await this.cache.set(apiKey, updatedCache);
 			}
 		} catch (error) {
 			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
