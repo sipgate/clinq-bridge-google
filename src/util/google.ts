@@ -1,10 +1,10 @@
-import { Contact, ContactTemplate, PhoneNumber } from "@clinq/bridge";
+import { Contact, ContactTemplate, ContactUpdate, PhoneNumber } from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library";
-import { google, people_v1 } from "googleapis";
-import { ContactName } from "./contact-name.model";
+import { google, people_v1 as People } from "googleapis";
+import { convertContactToGooglePerson, convertGooglePersonToContact } from "./contact";
 import parseEnvironment from "./parse-environment";
 
-const { people } = google.people("v1");
+const { people: PeopleAPI } = google.people("v1");
 
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts";
 const RESOURCE_NAME = "people/me";
@@ -43,79 +43,42 @@ export function getOAuth2RedirectUrl(): string {
 	});
 }
 
-function convertGoogleContact(connection: people_v1.Schema$Person): Contact | null {
-	const id = getGoogleContactId(connection);
-	const contactName = getGoogleContactName(connection);
-	const company = getGoogleContactCompany(connection);
-	const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
-	const email = getGoogleContactPrimaryEmailAddress(connection);
-	const phoneNumbers = getGoogleContactPhoneNumbers(connection);
-	const avatarUrl = getGoogleContactPhoto(connection);
-
-	if (id && phoneNumbers && phoneNumbers.length > 0) {
-		return {
-			id,
-			name: null,
-			firstName: contactName ? contactName.firstName : null,
-			lastName: contactName ? contactName.lastName : null,
-			email,
-			company,
-			contactUrl,
-			avatarUrl,
-			phoneNumbers
-		};
-	}
-	return null;
-}
-
 export async function deleteGoogleContact(client: OAuth2Client, id: string): Promise<void> {
-	const params: people_v1.Params$Resource$People$Deletecontact = {
+	const params: People.Params$Resource$People$Deletecontact = {
 		auth: client,
 		resourceName: `people/${id}`
 	};
 
-	await people.deleteContact(params);
+	await PeopleAPI.deleteContact(params);
+}
+
+export async function updateGoogleContact(client: OAuth2Client, id: string, contact: ContactUpdate): Promise<void> {
+
+	const person = convertContactToGooglePerson(contact);
+
+	const params: People.Params$Resource$People$Updatecontact = {
+		auth: client,
+		resourceName: `people/${id}`,
+		requestBody: person
+	};
+
+	await PeopleAPI.updateContact(params);
 }
 
 export async function createGoogleContact(
 	client: OAuth2Client,
 	contact: ContactTemplate
 ): Promise<Contact> {
-	const person: people_v1.Schema$Person = {};
+	const person = convertContactToGooglePerson(contact);
 
-	const name: people_v1.Schema$Name = {};
-	if (contact.firstName) {
-		name.givenName = contact.firstName;
-	}
-	if (contact.lastName) {
-		name.familyName = contact.lastName;
-	}
-	person.names = [name];
-
-	if (contact.email) {
-		person.emailAddresses = [{ value: contact.email }];
-	}
-
-	person.phoneNumbers = contact.phoneNumbers.map(
-		(entry): people_v1.Schema$PhoneNumber => {
-			const phoneNumber: people_v1.Schema$PhoneNumber = {
-				value: entry.phoneNumber
-			};
-			if (entry.label) {
-				phoneNumber.type = entry.label;
-			}
-			return phoneNumber;
-		}
-	);
-
-	const params: people_v1.Params$Resource$People$Createcontact = {
+	const params: People.Params$Resource$People$Createcontact = {
 		auth: client,
 		requestBody: person
 	};
 
-	const response = await people.createContact(params);
+	const response = await PeopleAPI.createContact(params);
 
-	const parsedContact = convertGoogleContact(response.data);
+	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
 		throw new Error("Could not parse contact.");
 	}
@@ -128,7 +91,7 @@ export async function getGoogleContacts(
 	token?: string,
 	previousContacts?: Contact[]
 ): Promise<Contact[]> {
-	const params: people_v1.Params$Resource$People$Connections$List = {
+	const params: People.Params$Resource$People$Connections$List = {
 		auth: client,
 		pageToken: token,
 		personFields: PERSON_FIELDS,
@@ -136,7 +99,7 @@ export async function getGoogleContacts(
 		pageSize: PAGE_SIZE
 	};
 
-	const response = await people.connections.list(params);
+	const response = await PeopleAPI.connections.list(params);
 
 	const { connections, nextPageToken, totalItems } = response.data;
 
@@ -149,7 +112,7 @@ export async function getGoogleContacts(
 	const contacts: Contact[] = previousContacts || [];
 
 	for (const connection of connections) {
-		const contact = convertGoogleContact(connection);
+		const contact = convertGooglePersonToContact(connection);
 
 		if (contact) {
 			contacts.push(contact);
@@ -161,94 +124,4 @@ export async function getGoogleContacts(
 	}
 
 	return contacts;
-}
-
-export function getGoogleContactId(connection: people_v1.Schema$Person): string | null {
-	const { resourceName } = connection;
-	if (!resourceName) {
-		return null;
-	}
-	const parts = resourceName.split("/");
-	const id = parts[1];
-	if (!id) {
-		return null;
-	}
-
-	return id;
-}
-
-export function getGoogleContactName(connection: people_v1.Schema$Person): ContactName | null {
-	if (!connection.names) {
-		return null;
-	}
-	const [name] = connection.names;
-	if (!name) {
-		return null;
-	}
-	return {
-		firstName: name.givenName || null,
-		lastName: name.familyName || null
-	};
-}
-
-export function getGoogleContactCompany(connection: people_v1.Schema$Person): string | null {
-	if (!connection.organizations) {
-		return null;
-	}
-	const [company] = connection.organizations;
-	if (!company) {
-		return null;
-	}
-	return company.name || null;
-}
-
-export function getGoogleContactPhoneNumbers(
-	connection: people_v1.Schema$Person
-): PhoneNumber[] | null {
-	if (!connection.phoneNumbers) {
-		return null;
-	}
-	const phoneNumbers: PhoneNumber[] = [];
-	for (const phoneNumber of connection.phoneNumbers) {
-		if (phoneNumber.value) {
-			phoneNumbers.push({
-				label: phoneNumber.formattedType || null,
-				phoneNumber: phoneNumber.value
-			});
-		}
-	}
-	if (phoneNumbers.length < 1) {
-		return null;
-	}
-	return phoneNumbers;
-}
-
-export function getGoogleContactPrimaryEmailAddress(
-	connection: people_v1.Schema$Person
-): string | null {
-	const { emailAddresses } = connection;
-	if (!emailAddresses) {
-		return null;
-	}
-	const primaryEmailAddress = emailAddresses.find(entry =>
-		Boolean(entry.metadata && entry.metadata.primary)
-	);
-	if (!primaryEmailAddress) {
-		return null;
-	}
-	return primaryEmailAddress.value || null;
-}
-
-export function getGoogleContactPhoto(connection: people_v1.Schema$Person): string | null {
-	const { photos } = connection;
-	if (!photos) {
-		return null;
-	}
-
-	const photo = photos.find(entry => Boolean(entry.metadata && entry.metadata.primary));
-	if (!photo) {
-		return null;
-	}
-
-	return photo.url || null;
 }
