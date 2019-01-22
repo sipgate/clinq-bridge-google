@@ -5,6 +5,7 @@ import { OAuth2Client } from "google-auth-library";
 import { RedisCache } from "./cache";
 import {
 	createGoogleContact,
+	deleteGoogleContact,
 	getAuthorizedOAuth2Client,
 	getGoogleContacts,
 	getOAuth2Client,
@@ -44,10 +45,35 @@ class GoogleContactsAdapter implements Adapter {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			const createdContact = await createGoogleContact(client, contact);
+
+			const cached = await this.cache.get(apiKey);
+
+			if (cached) {
+				const updatedCache = [...cached, createdContact];
+				await this.cache.set(apiKey, updatedCache);
+			}
+
 			return createdContact;
 		} catch (error) {
 			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
 			throw new ServerError(400, "Could not create contact");
+		}
+	}
+
+	public async deleteContact({ apiKey }: Config, id: string): Promise<void> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			await deleteGoogleContact(client, id);
+
+			const cached = await this.cache.get(apiKey);
+
+			if (cached) {
+				const filteredCache = cached.filter(entry => entry.id !== id);
+				await this.cache.set(apiKey, filteredCache);
+			}
+		} catch (error) {
+			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
+			throw new ServerError(401, "Could not delete contact");
 		}
 	}
 

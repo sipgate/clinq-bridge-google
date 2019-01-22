@@ -68,6 +68,15 @@ function convertGoogleContact(connection: people_v1.Schema$Person): Contact | nu
 	return null;
 }
 
+export async function deleteGoogleContact(client: OAuth2Client, id: string): Promise<void> {
+	const params: people_v1.Params$Resource$People$Deletecontact = {
+		auth: client,
+		resourceName: `people/${id}`
+	};
+
+	await people.deleteContact(params);
+}
+
 export async function createGoogleContact(
 	client: OAuth2Client,
 	contact: ContactTemplate
@@ -105,6 +114,7 @@ export async function createGoogleContact(
 	};
 
 	const response = await people.createContact(params);
+
 	const parsedContact = convertGoogleContact(response.data);
 	if (!parsedContact) {
 		throw new Error("Could not parse contact.");
@@ -154,15 +164,17 @@ export async function getGoogleContacts(
 }
 
 export function getGoogleContactId(connection: people_v1.Schema$Person): string | null {
-	const { metadata } = connection;
-	if (!metadata || !metadata.sources) {
+	const { resourceName } = connection;
+	if (!resourceName) {
 		return null;
 	}
-	const contactMetadata = metadata.sources.find(entry => entry.type === "CONTACT");
-	if (!contactMetadata || !contactMetadata.id) {
+	const parts = resourceName.split("/");
+	const id = parts[1];
+	if (!id) {
 		return null;
 	}
-	return contactMetadata.id;
+
+	return id;
 }
 
 export function getGoogleContactName(connection: people_v1.Schema$Person): ContactName | null {
