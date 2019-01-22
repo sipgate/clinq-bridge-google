@@ -117,8 +117,8 @@ export async function getGoogleContacts(
 
 	const contacts: Contact[] = previousContacts || [];
 
-	for (const connection of connections) {
-		const contact = convertGooglePersonToContact(connection);
+	for (const person of connections) {
+		const contact = convertGooglePersonToContact(person);
 
 		if (contact) {
 			contacts.push(contact);
