@@ -52,7 +52,7 @@ export async function deleteGoogleContact(client: OAuth2Client, id: string): Pro
 	await PeopleAPI.deleteContact(params);
 }
 
-export async function updateGoogleContact(client: OAuth2Client, id: string, contact: ContactUpdate): Promise<void> {
+export async function updateGoogleContact(client: OAuth2Client, id: string, contact: ContactUpdate): Promise<Contact> {
 
 	const person = convertContactToGooglePerson(contact);
 
@@ -62,7 +62,13 @@ export async function updateGoogleContact(client: OAuth2Client, id: string, cont
 		requestBody: person
 	};
 
-	await PeopleAPI.updateContact(params);
+	const response = await PeopleAPI.updateContact(params);
+
+	const parsedContact = convertGooglePersonToContact(response.data);
+	if (!parsedContact) {
+		throw new Error("Could not parse contact.");
+	}
+	return parsedContact;
 }
 
 export async function createGoogleContact(
