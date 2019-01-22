@@ -1,4 +1,4 @@
-import { Contact, ContactTemplate, ContactUpdate, PhoneNumber } from "@clinq/bridge";
+import { Contact, ContactTemplate, ContactUpdate, PhoneNumber, ServerError } from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
 import { convertContactToGooglePerson, convertGooglePersonToContact } from "./contact";
@@ -52,17 +52,29 @@ export async function deleteGoogleContact(client: OAuth2Client, id: string): Pro
 	await PeopleAPI.deleteContact(params);
 }
 
-export async function updateGoogleContact(client: OAuth2Client, id: string, contact: ContactUpdate): Promise<Contact> {
+export async function updateGoogleContact(
+	client: OAuth2Client,
+	id: string,
+	contact: ContactUpdate
+): Promise<Contact> {
+	const params = {
+		auth: client,
+		resourceName: `people/${id}`
+	};
 
 	const person = convertContactToGooglePerson(contact);
 
-	const params: People.Params$Resource$People$Updatecontact = {
-		auth: client,
-		resourceName: `people/${id}`,
-		requestBody: person
-	};
+	const personResource = await PeopleAPI.get({ ...params, personFields: PERSON_FIELDS });
 
-	const response = await PeopleAPI.updateContact(params);
+	if (!personResource) {
+		throw new ServerError(404, "Contact not found");
+	}
+
+	const response = await PeopleAPI.updateContact({
+		...params,
+		requestBody: { ...person, etag: personResource.data.etag },
+		updatePersonFields: PERSON_FIELDS
+	});
 
 	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
@@ -83,6 +95,8 @@ export async function createGoogleContact(
 	};
 
 	const response = await PeopleAPI.createContact(params);
+
+	console.log(response);
 
 	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
