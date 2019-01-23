@@ -96,8 +96,6 @@ export async function createGoogleContact(
 
 	const response = await PeopleAPI.createContact(params);
 
-	console.log(response);
-
 	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
 		throw new Error("Could not parse contact.");
