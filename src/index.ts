@@ -61,7 +61,11 @@ class GoogleContactsAdapter implements Adapter {
 		}
 	}
 
-	public async updateContact({ apiKey }: Config, id: string, contact: ContactUpdate): Promise<Contact> {
+	public async updateContact(
+		{ apiKey }: Config,
+		id: string,
+		contact: ContactUpdate
+	): Promise<Contact> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			const createdContact = await updateGoogleContact(client, id, contact);
@@ -69,14 +73,14 @@ class GoogleContactsAdapter implements Adapter {
 			const cached = await this.cache.get(apiKey);
 
 			if (cached) {
-				const updatedCache = cached.map(entry => entry.id === id ? createdContact : entry);
+				const updatedCache = cached.map(entry => (entry.id === id ? createdContact : entry));
 				await this.cache.set(apiKey, updatedCache);
 			}
 
 			return createdContact;
 		} catch (error) {
-			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
-			throw new ServerError(400, "Could not create contact");
+			console.error(`Could not update contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
+			throw new ServerError(400, "Could not update contact");
 		}
 	}
 
@@ -92,7 +96,7 @@ class GoogleContactsAdapter implements Adapter {
 				await this.cache.set(apiKey, updatedCache);
 			}
 		} catch (error) {
-			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
+			console.error(`Could not delete contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
 			throw new ServerError(401, "Could not delete contact");
 		}
 	}
