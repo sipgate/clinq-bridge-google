@@ -3,11 +3,12 @@ import { people_v1 as People } from "googleapis";
 import { ContactName } from "./contact-name.model";
 
 export function convertGooglePersonToContact(connection: People.Schema$Person): Contact | null {
-	const id = getGoogleContactId(connection);
+	const id = getGooglePersonResourceId(connection);
+	const contactId = getGoogleContactId(connection);
 	const contactName = getGoogleContactName(connection);
 	const company = getGoogleContactCompany(connection);
-	const contactUrl = id ? `https://www.google.com/contacts/u/0/#contact/${id}` : null;
-	const email = getGoogleContactPrimaryEmailAddress(connection);
+	const contactUrl = contactId ? `https://contacts.google.com/contact/${contactId}` : null;
+	const email = getGoogleContactEmailAddress(connection);
 	const phoneNumbers = getGoogleContactPhoneNumbers(connection);
 	const avatarUrl = getGoogleContactPhoto(connection);
 
@@ -45,6 +46,10 @@ export function convertContactToGooglePerson(
 		person.emailAddresses = [{ value: contact.email }];
 	}
 
+	if (contact.company) {
+		person.organizations = [{ name: contact.company }];
+	}
+
 	person.phoneNumbers = contact.phoneNumbers.map(
 		(entry): People.Schema$PhoneNumber => {
 			const phoneNumber: People.Schema$PhoneNumber = {
@@ -60,7 +65,7 @@ export function convertContactToGooglePerson(
 	return person;
 }
 
-function getGoogleContactId(connection: People.Schema$Person): string | null {
+function getGooglePersonResourceId(connection: People.Schema$Person): string | null {
 	const { resourceName } = connection;
 	if (!resourceName) {
 		return null;
@@ -74,11 +79,23 @@ function getGoogleContactId(connection: People.Schema$Person): string | null {
 	return id;
 }
 
+function getGoogleContactId(connection: People.Schema$Person): string | null {
+	const { metadata } = connection;
+	if (!metadata || !metadata.sources) {
+		return null;
+	}
+	const source = metadata.sources.find(entry => entry.type === "CONTACT");
+	if (!source) {
+		return null;
+	}
+	return source.id ? source.id : null;
+}
+
 function getGoogleContactName(connection: People.Schema$Person): ContactName | null {
 	if (!connection.names) {
 		return null;
 	}
-	const [name] = connection.names;
+	const name = connection.names.find(entry => isGoogleContactField(entry.metadata));
 	if (!name) {
 		return null;
 	}
@@ -105,7 +122,8 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 	}
 	const phoneNumbers: PhoneNumber[] = [];
 	for (const phoneNumber of connection.phoneNumbers) {
-		if (phoneNumber.value) {
+		const isContactNumber = isGoogleContactField(phoneNumber.metadata);
+		if (isContactNumber && phoneNumber.value) {
 			phoneNumbers.push({
 				label: phoneNumber.formattedType || null,
 				phoneNumber: phoneNumber.value
@@ -118,18 +136,16 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 	return phoneNumbers;
 }
 
-function getGoogleContactPrimaryEmailAddress(connection: People.Schema$Person): string | null {
+function getGoogleContactEmailAddress(connection: People.Schema$Person): string | null {
 	const { emailAddresses } = connection;
 	if (!emailAddresses) {
 		return null;
 	}
-	const primaryEmailAddress = emailAddresses.find(entry =>
-		Boolean(entry.metadata && entry.metadata.primary)
-	);
-	if (!primaryEmailAddress) {
+	const contactEmailAddress = emailAddresses.find(entry => isGoogleContactField(entry.metadata));
+	if (!contactEmailAddress) {
 		return null;
 	}
-	return primaryEmailAddress.value || null;
+	return contactEmailAddress.value || null;
 }
 
 function getGoogleContactPhoto(connection: People.Schema$Person): string | null {
@@ -138,10 +154,23 @@ function getGoogleContactPhoto(connection: People.Schema$Person): string | null 
 		return null;
 	}
 
-	const photo = photos.find(entry => Boolean(entry.metadata && entry.metadata.primary));
+	const photo = photos.find(entry => isGoogleContactField(entry.metadata));
 	if (!photo) {
 		return null;
 	}
 
 	return photo.url || null;
+}
+
+function isGoogleContactField(metadata?: People.Schema$FieldMetadata): boolean {
+	if (!metadata) {
+		return false;
+	}
+	if (!metadata.source) {
+		return false;
+	}
+	if (!metadata.source.type) {
+		return false;
+	}
+	return metadata.source.type === "CONTACT";
 }

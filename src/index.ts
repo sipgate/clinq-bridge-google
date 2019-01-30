@@ -68,16 +68,16 @@ class GoogleContactsAdapter implements Adapter {
 	): Promise<Contact> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
-			const createdContact = await updateGoogleContact(client, id, contact);
+			const updatedContact = await updateGoogleContact(client, id, contact);
 
 			const cached = await this.cache.get(apiKey);
 
 			if (cached) {
-				const updatedCache = cached.map(entry => (entry.id === id ? createdContact : entry));
+				const updatedCache = cached.map(entry => (entry.id === id ? updatedContact : entry));
 				await this.cache.set(apiKey, updatedCache);
 			}
 
-			return createdContact;
+			return updatedContact;
 		} catch (error) {
 			console.error(`Could not update contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
 			throw new ServerError(400, "Could not update contact");
