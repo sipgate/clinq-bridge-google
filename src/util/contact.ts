@@ -1,4 +1,10 @@
-import { Contact, ContactTemplate, ContactUpdate, PhoneNumber } from "@clinq/bridge";
+import {
+	Contact,
+	ContactTemplate,
+	ContactUpdate,
+	PhoneNumber,
+	PhoneNumberLabel
+} from "@clinq/bridge";
 import { people_v1 as People } from "googleapis";
 import { ContactName } from "./contact-name.model";
 
@@ -6,7 +12,7 @@ export function convertGooglePersonToContact(connection: People.Schema$Person): 
 	const id = getGooglePersonResourceId(connection);
 	const contactId = getGoogleContactId(connection);
 	const contactName = getGoogleContactName(connection);
-	const company = getGoogleContactCompany(connection);
+	const organization = getGoogleContactOrganization(connection);
 	const contactUrl = contactId ? `https://contacts.google.com/contact/${contactId}` : null;
 	const email = getGoogleContactEmailAddress(connection);
 	const phoneNumbers = getGoogleContactPhoneNumbers(connection);
@@ -19,7 +25,7 @@ export function convertGooglePersonToContact(connection: People.Schema$Person): 
 			firstName: contactName ? contactName.firstName : null,
 			lastName: contactName ? contactName.lastName : null,
 			email,
-			company,
+			organization,
 			contactUrl,
 			avatarUrl,
 			phoneNumbers
@@ -46,23 +52,39 @@ export function convertContactToGooglePerson(
 		person.emailAddresses = [{ value: contact.email }];
 	}
 
-	if (contact.company) {
-		person.organizations = [{ name: contact.company }];
+	if (contact.organization) {
+		person.organizations = [{ name: contact.organization }];
 	}
 
-	person.phoneNumbers = contact.phoneNumbers.map(
-		(entry): People.Schema$PhoneNumber => {
-			const phoneNumber: People.Schema$PhoneNumber = {
-				value: entry.phoneNumber
-			};
-			if (entry.label) {
-				phoneNumber.type = entry.label;
+	person.phoneNumbers = contact.phoneNumbers
+		.filter(entry => getGooglePhoneNumberLabel(entry.label))
+		.map(
+			(entry): People.Schema$PhoneNumber => {
+				const phoneNumber: People.Schema$PhoneNumber = {
+					value: entry.phoneNumber
+				};
+				const phoneNumberLabel = getGooglePhoneNumberLabel(entry.label);
+				if (phoneNumberLabel) {
+					phoneNumber.type = phoneNumberLabel;
+				}
+				return phoneNumber;
 			}
-			return phoneNumber;
-		}
-	);
+		);
 
 	return person;
+}
+
+function getGooglePhoneNumberLabel(phoneNumberLabel?: string): string | null {
+	switch (phoneNumberLabel) {
+		case PhoneNumberLabel.HOME:
+			return "home";
+		case PhoneNumberLabel.WORK:
+			return "work";
+		case PhoneNumberLabel.MOBILE:
+			return "mobile";
+		default:
+			return null;
+	}
 }
 
 function getGooglePersonResourceId(connection: People.Schema$Person): string | null {
@@ -105,15 +127,15 @@ function getGoogleContactName(connection: People.Schema$Person): ContactName | n
 	};
 }
 
-function getGoogleContactCompany(connection: People.Schema$Person): string | null {
+function getGoogleContactOrganization(connection: People.Schema$Person): string | null {
 	if (!connection.organizations) {
 		return null;
 	}
-	const [company] = connection.organizations;
-	if (!company) {
+	const [organization] = connection.organizations;
+	if (!organization) {
 		return null;
 	}
-	return company.name || null;
+	return organization.name || null;
 }
 
 function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNumber[] | null {
@@ -123,9 +145,10 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 	const phoneNumbers: PhoneNumber[] = [];
 	for (const phoneNumber of connection.phoneNumbers) {
 		const isContactNumber = isGoogleContactField(phoneNumber.metadata);
-		if (isContactNumber && phoneNumber.value) {
+		const phoneNumberLabel = getPhoneNumberLabel(phoneNumber.type);
+		if (isContactNumber && phoneNumber.value && phoneNumberLabel) {
 			phoneNumbers.push({
-				label: phoneNumber.formattedType || null,
+				label: phoneNumberLabel,
 				phoneNumber: phoneNumber.value
 			});
 		}
@@ -134,6 +157,19 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 		return null;
 	}
 	return phoneNumbers;
+}
+
+function getPhoneNumberLabel(phoneNumberType?: string): PhoneNumberLabel | null {
+	switch (phoneNumberType) {
+		case "home":
+			return PhoneNumberLabel.HOME;
+		case "work":
+			return PhoneNumberLabel.WORK;
+		case "mobile":
+			return PhoneNumberLabel.MOBILE;
+		default:
+			return null;
+	}
 }
 
 function getGoogleContactEmailAddress(connection: People.Schema$Person): string | null {
