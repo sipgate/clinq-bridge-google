@@ -59,6 +59,14 @@ class GoogleContactsAdapter implements Adapter {
 
 			return createdContact;
 		} catch (error) {
+			if (error.code && error.errors && error.errors.length > 0) {
+				console.error(
+					`Could not delete contact for key "${anonymizeKey(apiKey)}: ${JSON.stringify(
+						error.errors
+					)}"`
+				);
+				throw new ServerError(error.code, JSON.stringify(error.errors[0]));
+			}
 			console.error(`Could not create contact for key "${anonymizedKey}: ${error.message}"`);
 			throw new ServerError(400, "Could not create contact");
 		}
@@ -85,6 +93,14 @@ class GoogleContactsAdapter implements Adapter {
 
 			return updatedContact;
 		} catch (error) {
+			if (error.code && error.errors && error.errors.length > 0) {
+				console.error(
+					`Could not delete contact for key "${anonymizeKey(apiKey)}: ${JSON.stringify(
+						error.errors
+					)}"`
+				);
+				throw new ServerError(error.code, JSON.stringify(error.errors[0]));
+			}
 			console.error(`Could not update contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
 			throw new ServerError(400, "Could not update contact");
 		}
@@ -102,6 +118,14 @@ class GoogleContactsAdapter implements Adapter {
 				await this.cache.set(apiKey, updatedCache);
 			}
 		} catch (error) {
+			if (error.code && error.errors && error.errors.length > 0) {
+				console.error(
+					`Could not delete contact for key "${anonymizeKey(apiKey)}: ${JSON.stringify(
+						error.errors
+					)}"`
+				);
+				throw new ServerError(error.code, JSON.stringify(error.errors[0]));
+			}
 			console.error(`Could not delete contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
 			throw new ServerError(401, "Could not delete contact");
 		}
