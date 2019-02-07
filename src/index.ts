@@ -43,8 +43,11 @@ class GoogleContactsAdapter implements Adapter {
 	}
 
 	public async createContact({ apiKey }: Config, contact: ContactTemplate): Promise<Contact> {
+		const anonymizedKey = anonymizeKey(apiKey);
 		try {
+			console.log(`Authorizing client for key ${anonymizedKey}`);
 			const client = await getAuthorizedOAuth2Client(apiKey);
+			console.log(`Creating contact for key ${anonymizedKey}`);
 			const createdContact = await createGoogleContact(client, contact);
 
 			const cached = await this.cache.get(apiKey);
@@ -56,7 +59,7 @@ class GoogleContactsAdapter implements Adapter {
 
 			return createdContact;
 		} catch (error) {
-			console.error(`Could not create contact for key "${anonymizeKey(apiKey)}: ${error.message}"`);
+			console.error(`Could not create contact for key "${anonymizedKey}: ${error.message}"`);
 			throw new ServerError(400, "Could not create contact");
 		}
 	}
