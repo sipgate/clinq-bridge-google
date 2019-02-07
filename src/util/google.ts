@@ -1,4 +1,5 @@
 import { Contact, ContactTemplate, ContactUpdate, PhoneNumber, ServerError } from "@clinq/bridge";
+import { AxiosResponse } from "axios";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
 import { convertContactToGooglePerson, convertGooglePersonToContact } from "./contact";
@@ -64,19 +65,27 @@ export async function updateGoogleContact(
 
 	const person = convertContactToGooglePerson(contact);
 
-	console.log(`Fetching person resource for id ${id}`);
 	const personResource = await PeopleAPI.get({ ...params, personFields: PERSON_FIELDS });
 
 	if (!personResource) {
 		throw new ServerError(404, "Contact not found");
 	}
 
-	console.log(`Updating person resource for id ${id}`);
-	const response = await PeopleAPI.updateContact({
-		...params,
-		requestBody: { ...person, etag: personResource.data.etag },
-		updatePersonFields: PERSON_FIELDS
-	});
+	let response = null;
+	try {
+		response = await PeopleAPI.updateContact({
+			...params,
+			requestBody: { ...person, etag: personResource.data.etag },
+			updatePersonFields: PERSON_FIELDS
+		});
+	} catch (error) {
+		console.log(`Update failed. Retrying to update contact ${id}: ${error.message}`);
+		response = await PeopleAPI.updateContact({
+			...params,
+			requestBody: { ...person, etag: personResource.data.etag },
+			updatePersonFields: PERSON_FIELDS
+		});
+	}
 
 	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
@@ -96,7 +105,13 @@ export async function createGoogleContact(
 		requestBody: person
 	};
 
-	const response = await PeopleAPI.createContact(params);
+	let response = null;
+	try {
+		response = await PeopleAPI.createContact(params);
+	} catch (error) {
+		console.log(`Creating contact failed: ${error.message}`);
+		response = await PeopleAPI.createContact(params);
+	}
 
 	const parsedContact = convertGooglePersonToContact(response.data);
 	if (!parsedContact) {
