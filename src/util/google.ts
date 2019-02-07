@@ -64,12 +64,14 @@ export async function updateGoogleContact(
 
 	const person = convertContactToGooglePerson(contact);
 
+	console.log(`Fetching person resource for id ${id}`);
 	const personResource = await PeopleAPI.get({ ...params, personFields: PERSON_FIELDS });
 
 	if (!personResource) {
 		throw new ServerError(404, "Contact not found");
 	}
 
+	console.log(`Updating person resource for id ${id}`);
 	const response = await PeopleAPI.updateContact({
 		...params,
 		requestBody: { ...person, etag: personResource.data.etag },
