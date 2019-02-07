@@ -69,8 +69,11 @@ class GoogleContactsAdapter implements Adapter {
 		id: string,
 		contact: ContactUpdate
 	): Promise<Contact> {
+		const anonymizedKey = anonymizeKey(apiKey);
 		try {
+			console.log(`Authorizing client for key ${anonymizedKey}`);
 			const client = await getAuthorizedOAuth2Client(apiKey);
+			console.log(`Creating contact for key ${anonymizedKey}`);
 			const updatedContact = await updateGoogleContact(client, id, contact);
 
 			const cached = await this.cache.get(apiKey);
