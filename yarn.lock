@@ -2,16 +2,19 @@
 # yarn lockfile v1
 
 
-"@clinq/bridge@^7.1.1":
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-7.1.1.tgz#34b3b8b75fdf115a6ef93b78b6e38b2078d07aba"
+"@clinq/bridge@^7.2.2":
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-7.2.2.tgz#80111a85c4b951597e8479db4ef6548a0cda89d8"
+  integrity sha512-ZhHG3kKzaWGd/R9h2uW3odHZTgg+c6TFlxZ1/WrsJncTjCyt/YI1RCHTIhoLOBjX+33kUV9u2i3xjgmA9fn9mQ==
   dependencies:
+    "@types/google-libphonenumber" "^7.4.17"
     ajv "^6.1.1"
     axios "^0.18.0"
     body-parser "^1.18.3"
     cookie-parser "^1.4.3"
     cors "^2.8.4"
     express "^4.16.2"
+    google-libphonenumber "^3.2.2"
     redis "^2.8.0"
 
 "@types/body-parser@*":
@@ -41,6 +44,11 @@
     "@types/body-parser" "*"
     "@types/express-serve-static-core" "*"
     "@types/serve-static" "*"
+
+"@types/google-libphonenumber@^7.4.17":
+  version "7.4.17"
+  resolved "https://registry.yarnpkg.com/@types/google-libphonenumber/-/google-libphonenumber-7.4.17.tgz#26974213353cb459e403a5740812115a596cf170"
+  integrity sha512-NdqFHXBGxwiGjJn7dTAjcCckgxE+LbE3jik6/SNiC9ZfG4BxHJM1X6m8w+/ZpSGRN5s0+4dIL+MaD/KSXywp1g==
 
 "@types/mime@*":
   version "2.0.0"
@@ -816,6 +824,11 @@ google-auth-library@^3.0.0:
     jws "^3.1.5"
     lru-cache "^5.0.0"
     semver "^5.5.0"
+
+google-libphonenumber@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.2.tgz#3d9d7ba727e99a50812f21b0ed313723b76c5c54"
+  integrity sha512-ubjGeosYPeusjYbUHy76lCniGTTI0k1rIFc+uKBX+jHQLDmWOSUtlFUxaeoLJ+Y+PAMM6dWp+C1HjHx5BI8kEw==
 
 google-p12-pem@^1.0.0:
   version "1.0.3"
