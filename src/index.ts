@@ -1,8 +1,6 @@
 import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
 import { ContactTemplate, ContactUpdate } from "@clinq/bridge/dist/models";
 import { Request } from "express";
-import { OAuth2Client } from "google-auth-library";
-import { RedisCache } from "./cache";
 import {
 	createGoogleContact,
 	deleteGoogleContact,
@@ -14,32 +12,16 @@ import {
 } from "./util";
 import { anonymizeKey } from "./util/anonymize-key";
 
-const { REDIS_URL } = process.env;
-
 class GoogleContactsAdapter implements Adapter {
-	private cache: RedisCache;
-
-	constructor() {
-		if (!REDIS_URL) {
-			throw new Error("Missing Redis URL in environment");
-		}
-		this.cache = new RedisCache(REDIS_URL);
-	}
 
 	public async getContacts({ apiKey }: Config): Promise<Contact[]> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
-			this.populateCache(client, apiKey);
+			return await getGoogleContacts(client);
 		} catch (error) {
 			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
 			throw new ServerError(401, "Unauthorized");
 		}
-		const cached = await this.cache.get(apiKey);
-		if (cached) {
-			console.log(`Returning ${cached.length} contacts for key "${anonymizeKey(apiKey)}".`);
-			return cached;
-		}
-		return [];
 	}
 
 	public async createContact({ apiKey }: Config, contact: ContactTemplate): Promise<Contact> {
@@ -48,16 +30,8 @@ class GoogleContactsAdapter implements Adapter {
 			console.log(`Authorizing client for key ${anonymizedKey}`);
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			console.log(`Creating contact for key ${anonymizedKey}`);
-			const createdContact = await createGoogleContact(client, contact);
 
-			const cached = await this.cache.get(apiKey);
-
-			if (cached) {
-				const updatedCache = [...cached, createdContact];
-				await this.cache.set(apiKey, updatedCache);
-			}
-
-			return createdContact;
+			return await createGoogleContact(client, contact);
 		} catch (error) {
 			if (error.code && error.errors && error.errors.length > 0) {
 				console.error(
@@ -82,16 +56,8 @@ class GoogleContactsAdapter implements Adapter {
 			console.log(`Authorizing client for key ${anonymizedKey}`);
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			console.log(`Updating contact for key ${anonymizedKey}`);
-			const updatedContact = await updateGoogleContact(client, id, contact);
 
-			const cached = await this.cache.get(apiKey);
-
-			if (cached) {
-				const updatedCache = cached.map(entry => (entry.id === id ? updatedContact : entry));
-				await this.cache.set(apiKey, updatedCache);
-			}
-
-			return updatedContact;
+			return await updateGoogleContact(client, id, contact);
 		} catch (error) {
 			if (error.code && error.errors && error.errors.length > 0) {
 				console.error(
@@ -111,12 +77,6 @@ class GoogleContactsAdapter implements Adapter {
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			await deleteGoogleContact(client, id);
 
-			const cached = await this.cache.get(apiKey);
-
-			if (cached) {
-				const updatedCache = cached.filter(entry => entry.id !== id);
-				await this.cache.set(apiKey, updatedCache);
-			}
 		} catch (error) {
 			if (error.code && error.errors && error.errors.length > 0) {
 				console.error(
@@ -148,14 +108,6 @@ class GoogleContactsAdapter implements Adapter {
 		return config;
 	}
 
-	private async populateCache(client: OAuth2Client, apiKey: string): Promise<void> {
-		try {
-			const contacts = await getGoogleContacts(client);
-			await this.cache.set(apiKey, contacts);
-		} catch (error) {
-			console.error(error.message);
-		}
-	}
 }
 
 start(new GoogleContactsAdapter());

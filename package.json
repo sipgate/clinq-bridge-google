@@ -14,12 +14,10 @@
 		"watch": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
 	},
 	"dependencies": {
-		"@clinq/bridge": "^7.0.2",
+		"@clinq/bridge": "^7.1.1",
 		"@types/express": "^4.16.1",
 		"@types/node": "^10.12.20",
-		"@types/redis": "^2.8.10",
 		"googleapis": "^37.1.0",
-		"redis": "^2.8.0",
 		"typescript": "^3.2.4"
 	},
 	"devDependencies": {
