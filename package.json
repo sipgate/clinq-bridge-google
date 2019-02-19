@@ -14,7 +14,7 @@
 		"watch": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
 	},
 	"dependencies": {
-		"@clinq/bridge": "^7.3.1",
+		"@clinq/bridge": "^7.4.0",
 		"@types/express": "^4.16.1",
 		"@types/node": "^10.12.20",
 		"googleapis": "^37.1.0",
