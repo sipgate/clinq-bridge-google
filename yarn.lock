@@ -2,19 +2,19 @@
 # yarn lockfile v1
 
 
-"@clinq/bridge@^7.2.2":
-  version "7.2.2"
-  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-7.2.2.tgz#80111a85c4b951597e8479db4ef6548a0cda89d8"
-  integrity sha512-ZhHG3kKzaWGd/R9h2uW3odHZTgg+c6TFlxZ1/WrsJncTjCyt/YI1RCHTIhoLOBjX+33kUV9u2i3xjgmA9fn9mQ==
+"@clinq/bridge@^7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-7.3.1.tgz#c62e375ee2036c875e6ee9f5530e5339f08c0111"
   dependencies:
-    "@types/google-libphonenumber" "^7.4.17"
     ajv "^6.1.1"
     axios "^0.18.0"
     body-parser "^1.18.3"
     cookie-parser "^1.4.3"
     cors "^2.8.4"
     express "^4.16.2"
+    get-port "^4.1.0"
     google-libphonenumber "^3.2.2"
+    lru-cache "^5.1.1"
     redis "^2.8.0"
 
 "@types/body-parser@*":
@@ -44,11 +44,6 @@
     "@types/body-parser" "*"
     "@types/express-serve-static-core" "*"
     "@types/serve-static" "*"
-
-"@types/google-libphonenumber@^7.4.17":
-  version "7.4.17"
-  resolved "https://registry.yarnpkg.com/@types/google-libphonenumber/-/google-libphonenumber-7.4.17.tgz#26974213353cb459e403a5740812115a596cf170"
-  integrity sha512-NdqFHXBGxwiGjJn7dTAjcCckgxE+LbE3jik6/SNiC9ZfG4BxHJM1X6m8w+/ZpSGRN5s0+4dIL+MaD/KSXywp1g==
 
 "@types/mime@*":
   version "2.0.0"
@@ -779,6 +774,10 @@ gcp-metadata@^0.9.3:
     gaxios "^1.0.2"
     json-bigint "^0.3.0"
 
+get-port@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/get-port/-/get-port-4.1.0.tgz#93eb3d5552c197497d76e9c389a6ac9920e20192"
+
 get-stream@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-3.0.0.tgz#8e943d1358dc37555054ecbe2edb05aa174ede14"
@@ -828,7 +827,6 @@ google-auth-library@^3.0.0:
 google-libphonenumber@^3.2.2:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.2.tgz#3d9d7ba727e99a50812f21b0ed313723b76c5c54"
-  integrity sha512-ubjGeosYPeusjYbUHy76lCniGTTI0k1rIFc+uKBX+jHQLDmWOSUtlFUxaeoLJ+Y+PAMM6dWp+C1HjHx5BI8kEw==
 
 google-p12-pem@^1.0.0:
   version "1.0.3"
@@ -1227,7 +1225,7 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-lru-cache@^5.0.0:
+lru-cache@^5.0.0, lru-cache@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
   dependencies:
