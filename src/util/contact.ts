@@ -18,7 +18,7 @@ export function convertGooglePersonToContact(connection: People.Schema$Person): 
 	const phoneNumbers = getGoogleContactPhoneNumbers(connection);
 	const avatarUrl = getGoogleContactPhoto(connection);
 
-	if (id && phoneNumbers && phoneNumbers.length > 0) {
+	if (id) {
 		return {
 			id,
 			name: null,
@@ -138,9 +138,9 @@ function getGoogleContactOrganization(connection: People.Schema$Person): string 
 	return organization.name || null;
 }
 
-function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNumber[] | null {
+function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNumber[] {
 	if (!connection.phoneNumbers) {
-		return null;
+		return [];
 	}
 	const phoneNumbers: PhoneNumber[] = [];
 	for (const phoneNumber of connection.phoneNumbers) {
@@ -152,9 +152,6 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 				phoneNumber: phoneNumber.value
 			});
 		}
-	}
-	if (phoneNumbers.length < 1) {
-		return null;
 	}
 	return phoneNumbers;
 }
