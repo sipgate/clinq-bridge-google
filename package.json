@@ -9,9 +9,8 @@
 	"license": "Apache-2.0",
 	"scripts": {
 		"postinstall": "tsc",
-		"compile": "tsc",
-		"start": "node dist/index",
-		"watch": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
+		"start": "ts-node-dev src/index.ts",
+		"lint": "tslint --project tsconfig.json"
 	},
 	"dependencies": {
 		"@clinq/bridge": "^7.7.1",
@@ -22,7 +21,7 @@
 	},
 	"devDependencies": {
 		"nodemon": "1.18.9",
-		"ts-node": "^8.0.2",
+		"ts-node-dev": "^1.0.0-pre.32",
 		"tslint": "^5.12.1",
 		"tslint-config-prettier": "^1.17.0"
 	}
