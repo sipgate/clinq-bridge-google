@@ -9,7 +9,8 @@ const { people: PeopleAPI } = google.people("v1");
 
 const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts";
 const RESOURCE_NAME = "people/me";
-const PERSON_FIELDS = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
+const PERSON_FIELDS_GET = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
+const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
 const PAGE_SIZE = 100;
 
 const { clientId, clientSecret, redirectUrl } = parseEnvironment();
@@ -65,7 +66,7 @@ export async function updateGoogleContact(
 
 	const person = convertContactToGooglePerson(contact);
 
-	const personResource = await PeopleAPI.get({ ...params, personFields: PERSON_FIELDS });
+	const personResource = await PeopleAPI.get({ ...params, personFields: PERSON_FIELDS_UPDATE });
 
 	if (!personResource) {
 		throw new ServerError(404, "Contact not found");
@@ -76,14 +77,14 @@ export async function updateGoogleContact(
 		response = await PeopleAPI.updateContact({
 			...params,
 			requestBody: { ...person, etag: personResource.data.etag },
-			updatePersonFields: PERSON_FIELDS
+			updatePersonFields: PERSON_FIELDS_UPDATE
 		});
 	} catch (error) {
 		console.log(`Update failed. Retrying to update contact ${id}: ${error.message}`);
 		response = await PeopleAPI.updateContact({
 			...params,
 			requestBody: { ...person, etag: personResource.data.etag },
-			updatePersonFields: PERSON_FIELDS
+			updatePersonFields: PERSON_FIELDS_UPDATE
 		});
 	}
 
@@ -129,7 +130,7 @@ export async function getGoogleContacts(
 	const params: People.Params$Resource$People$Connections$List = {
 		auth: client,
 		pageToken: token,
-		personFields: PERSON_FIELDS,
+		personFields: PERSON_FIELDS_GET,
 		resourceName: RESOURCE_NAME,
 		pageSize: PAGE_SIZE
 	};
