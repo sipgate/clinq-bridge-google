@@ -1,12 +1,7 @@
-import {
-	Contact,
-	ContactTemplate,
-	ContactUpdate,
-	PhoneNumber,
-	PhoneNumberLabel
-} from "@clinq/bridge";
+import { Contact, ContactTemplate, ContactUpdate, PhoneNumber,PhoneNumberLabel } from "@clinq/bridge";
 import { people_v1 as People } from "googleapis";
 import { ContactName } from "./contact-name.model";
+import { GooglePhoneNumberLabel } from "./phonnumber-label.model";
 
 export function convertGooglePersonToContact(connection: People.Schema$Person): Contact | null {
 	const id = getGooglePersonResourceId(connection);
@@ -57,9 +52,9 @@ export function convertContactToGooglePerson(
 	}
 
 	person.phoneNumbers = contact.phoneNumbers
-		.filter(entry => getGooglePhoneNumberLabel(entry.label))
+		.filter((entry: any) => getGooglePhoneNumberLabel(entry.label))
 		.map(
-			(entry): People.Schema$PhoneNumber => {
+			(entry: any): People.Schema$PhoneNumber => {
 				const phoneNumber: People.Schema$PhoneNumber = {
 					value: entry.phoneNumber
 				};
@@ -76,14 +71,28 @@ export function convertContactToGooglePerson(
 
 function getGooglePhoneNumberLabel(phoneNumberLabel?: string): string | null {
 	switch (phoneNumberLabel) {
-		case PhoneNumberLabel.HOME:
+		case GooglePhoneNumberLabel.HOME:
 			return "home";
-		case PhoneNumberLabel.WORK:
+		case GooglePhoneNumberLabel.WORK:
 			return "work";
-		case PhoneNumberLabel.MOBILE:
+		case GooglePhoneNumberLabel.MOBILE:
 			return "mobile";
+		case GooglePhoneNumberLabel.HOMEFAX:
+			return "homeFax";
+		case GooglePhoneNumberLabel.WORKFAX:
+			return "workFax";
+		case GooglePhoneNumberLabel.WORKMOBILE:
+			return "workMobile";
+		case GooglePhoneNumberLabel.WORKPAGER:
+			return "workPager";
+		case GooglePhoneNumberLabel.MAIN:
+			return "main";
+		case GooglePhoneNumberLabel.GOOGLEVOICE:
+			return "googleVoice";
+		case GooglePhoneNumberLabel.OTHER:
+			return "other";
 		default:
-			return null;
+			return phoneNumberLabel || null;
 	}
 }
 
@@ -142,10 +151,13 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 	if (!connection.phoneNumbers) {
 		return [];
 	}
+
+	console.log(JSON.stringify(connection.phoneNumbers, null, 2));
 	const phoneNumbers: PhoneNumber[] = [];
 	for (const phoneNumber of connection.phoneNumbers) {
 		const isContactNumber = isGoogleContactField(phoneNumber.metadata);
-		const phoneNumberLabel = getPhoneNumberLabel(phoneNumber.type);
+		// workaround to allow all provided labels
+		const phoneNumberLabel = (getPhoneNumberLabel(phoneNumber.type) as unknown) as PhoneNumberLabel;
 		if (isContactNumber && phoneNumber.value && phoneNumberLabel) {
 			phoneNumbers.push({
 				label: phoneNumberLabel,
@@ -156,16 +168,31 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 	return phoneNumbers;
 }
 
-function getPhoneNumberLabel(phoneNumberType?: string): PhoneNumberLabel | null {
+function getPhoneNumberLabel(phoneNumberType?: string): GooglePhoneNumberLabel {
 	switch (phoneNumberType) {
 		case "home":
-			return PhoneNumberLabel.HOME;
+			return GooglePhoneNumberLabel.HOME;
 		case "work":
-			return PhoneNumberLabel.WORK;
+			return GooglePhoneNumberLabel.WORK;
 		case "mobile":
-			return PhoneNumberLabel.MOBILE;
+			return GooglePhoneNumberLabel.MOBILE;
+		case "homeFax":
+			return GooglePhoneNumberLabel.HOMEFAX;
+		case "workFax":
+			return GooglePhoneNumberLabel.WORKFAX;
+		case "workMobile":
+			return GooglePhoneNumberLabel.WORKMOBILE;
+		case "workPager":
+			return GooglePhoneNumberLabel.WORKPAGER;
+		case "main":
+			return GooglePhoneNumberLabel.MAIN;
+		case "googleVoice":
+			return GooglePhoneNumberLabel.GOOGLEVOICE;
+		case "other":
+			return GooglePhoneNumberLabel.OTHER;
 		default:
-			return null;
+			// hack to allow all labels
+			return ((phoneNumberType || GooglePhoneNumberLabel.OTHER) as unknown) as GooglePhoneNumberLabel;
 	}
 }
 
