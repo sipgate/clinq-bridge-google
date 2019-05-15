@@ -1,4 +1,10 @@
-import { Contact, ContactTemplate, ContactUpdate, PhoneNumber,PhoneNumberLabel } from "@clinq/bridge";
+import {
+	Contact,
+	ContactTemplate,
+	ContactUpdate,
+	PhoneNumber,
+	PhoneNumberLabel
+} from "@clinq/bridge";
 import { people_v1 as People } from "googleapis";
 import { ContactName } from "./contact-name.model";
 import { GooglePhoneNumberLabel } from "./phonnumber-label.model";
@@ -140,7 +146,7 @@ function getGoogleContactOrganization(connection: People.Schema$Person): string 
 	if (!connection.organizations) {
 		return null;
 	}
-	const [organization] = connection.organizations;
+	const organization = connection.organizations.find(entry => isGoogleContactField(entry.metadata));
 	if (!organization) {
 		return null;
 	}
@@ -152,7 +158,6 @@ function getGoogleContactPhoneNumbers(connection: People.Schema$Person): PhoneNu
 		return [];
 	}
 
-	console.log(JSON.stringify(connection.phoneNumbers, null, 2));
 	const phoneNumbers: PhoneNumber[] = [];
 	for (const phoneNumber of connection.phoneNumbers) {
 		const isContactNumber = isGoogleContactField(phoneNumber.metadata);
@@ -192,7 +197,8 @@ function getPhoneNumberLabel(phoneNumberType?: string): GooglePhoneNumberLabel {
 			return GooglePhoneNumberLabel.OTHER;
 		default:
 			// hack to allow all labels
-			return ((phoneNumberType || GooglePhoneNumberLabel.OTHER) as unknown) as GooglePhoneNumberLabel;
+			return ((phoneNumberType ||
+				GooglePhoneNumberLabel.OTHER) as unknown) as GooglePhoneNumberLabel;
 	}
 }
 
