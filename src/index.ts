@@ -13,7 +13,6 @@ import {
 import { anonymizeKey } from "./util/anonymize-key";
 
 class GoogleContactsAdapter implements Adapter {
-
 	public async getContacts({ apiKey }: Config): Promise<Contact[]> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
@@ -76,7 +75,6 @@ class GoogleContactsAdapter implements Adapter {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			await deleteGoogleContact(client, id);
-
 		} catch (error) {
 			if (error.code && error.errors && error.errors.length > 0) {
 				console.error(
@@ -95,19 +93,18 @@ class GoogleContactsAdapter implements Adapter {
 		return getOAuth2RedirectUrl();
 	}
 
-	public async handleOAuth2Callback(req: Request): Promise<Config> {
+	public async handleOAuth2Callback(req: Request): Promise<{ apiKey: string; apiUrl: string }> {
 		const { code } = req.query;
 		const client = getOAuth2Client();
 		const {
 			tokens: { access_token, refresh_token }
 		} = await client.getToken(code);
-		const config: Config = {
+
+		return {
 			apiKey: `${access_token}:${refresh_token}`,
 			apiUrl: ""
 		};
-		return config;
 	}
-
 }
 
 start(new GoogleContactsAdapter());
