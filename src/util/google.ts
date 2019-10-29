@@ -1,13 +1,18 @@
-import { Contact, ContactTemplate, ContactUpdate, PhoneNumber, ServerError } from "@clinq/bridge";
-import { AxiosResponse } from "axios";
+import { Contact, ContactTemplate, ContactUpdate, ServerError } from "@clinq/bridge";
+import { CalendarEvent } from "@clinq/bridge/dist/models";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
+import { convertGoogleCalendarEntry } from "./calendar";
 import { convertContactToGooglePerson, convertGooglePersonToContact } from "./contact";
 import parseEnvironment from "./parse-environment";
 
 const { people: PeopleAPI } = google.people("v1");
+const { events } = google.calendar("v3");
 
-const GOOGLE_CONTACTS_SCOPE = "https://www.googleapis.com/auth/contacts";
+const GOOGLE_CONTACTS_SCOPES = [
+	"https://www.googleapis.com/auth/contacts",
+	"https://www.googleapis.com/auth/calendar"
+];
 const RESOURCE_NAME = "people/me";
 const PERSON_FIELDS_GET = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
 const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
@@ -40,7 +45,7 @@ export function getOAuth2RedirectUrl(): string {
 	const client = getOAuth2Client();
 	return client.generateAuthUrl({
 		access_type: "offline",
-		scope: GOOGLE_CONTACTS_SCOPE,
+		scope: GOOGLE_CONTACTS_SCOPES,
 		prompt: "consent"
 	});
 }
@@ -160,4 +165,22 @@ export async function getGoogleContacts(
 	}
 
 	return contacts;
+}
+export async function getGoogleCalendarEvents(auth: OAuth2Client): Promise<CalendarEvent[]> {
+	const {
+		data: { items }
+	} = await events.list({
+		auth,
+		calendarId: "primary",
+		timeMin: new Date().toISOString(),
+		maxResults: 10,
+		singleEvents: true,
+		orderBy: "startTime"
+	});
+
+	if (!items) {
+		return [];
+	}
+
+	return items.map(convertGoogleCalendarEntry);
 }

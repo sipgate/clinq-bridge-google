@@ -1,10 +1,11 @@
 import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
-import { ContactTemplate, ContactUpdate } from "@clinq/bridge/dist/models";
+import { CalendarEvent, ContactTemplate, ContactUpdate } from "@clinq/bridge/dist/models";
 import { Request } from "express";
 import {
 	createGoogleContact,
 	deleteGoogleContact,
 	getAuthorizedOAuth2Client,
+	getGoogleCalendarEvents,
 	getGoogleContacts,
 	getOAuth2Client,
 	getOAuth2RedirectUrl,
@@ -12,7 +13,7 @@ import {
 } from "./util";
 import { anonymizeKey } from "./util/anonymize-key";
 
-class GoogleContactsAdapter implements Adapter {
+class GoogleAdapter implements Adapter {
 	public async getContacts({ apiKey }: Config): Promise<Contact[]> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
@@ -89,6 +90,16 @@ class GoogleContactsAdapter implements Adapter {
 		}
 	}
 
+	public async getCalendarEvents({ apiKey }: Config): Promise<CalendarEvent[]> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			return getGoogleCalendarEvents(client);
+		} catch (error) {
+			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
+			throw new ServerError(401, "Unauthorized");
+		}
+	}
+
 	public async getOAuth2RedirectUrl(): Promise<string> {
 		return getOAuth2RedirectUrl();
 	}
@@ -107,4 +118,4 @@ class GoogleContactsAdapter implements Adapter {
 	}
 }
 
-start(new GoogleContactsAdapter());
+start(new GoogleAdapter());
