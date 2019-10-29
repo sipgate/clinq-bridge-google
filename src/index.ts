@@ -1,14 +1,22 @@
 import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
-import { CalendarEvent, ContactTemplate, ContactUpdate } from "@clinq/bridge/dist/models";
+import {
+	CalendarEvent,
+	CalendarEventTemplate,
+	ContactTemplate,
+	ContactUpdate
+} from "@clinq/bridge/dist/models";
 import { Request } from "express";
 import {
+	createGoogleCalendarEvent,
 	createGoogleContact,
+	deleteGoogleCalendarEvent,
 	deleteGoogleContact,
 	getAuthorizedOAuth2Client,
 	getGoogleCalendarEvents,
 	getGoogleContacts,
 	getOAuth2Client,
 	getOAuth2RedirectUrl,
+	updateGoogleCalendarEvent,
 	updateGoogleContact
 } from "./util";
 import { anonymizeKey } from "./util/anonymize-key";
@@ -95,7 +103,56 @@ class GoogleAdapter implements Adapter {
 			const client = await getAuthorizedOAuth2Client(apiKey);
 			return getGoogleCalendarEvents(client);
 		} catch (error) {
-			console.error(`Could not get contacts for key "${anonymizeKey(apiKey)}"`, error.message);
+			console.error(
+				`Could not get calendar events for key "${anonymizeKey(apiKey)}"`,
+				error.message
+			);
+			throw new ServerError(401, "Unauthorized");
+		}
+	}
+
+	public async createCalendarEvent(
+		{ apiKey }: Config,
+		calendarEvent: CalendarEventTemplate
+	): Promise<CalendarEvent> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			return createGoogleCalendarEvent(client, calendarEvent);
+		} catch (error) {
+			console.error(
+				`Could not create calendar event for key "${anonymizeKey(apiKey)}"`,
+				error.message
+			);
+			throw new ServerError(401, "Unauthorized");
+		}
+	}
+
+	public async updateCalendarEvent(
+		{ apiKey }: Config,
+		id: string,
+		calendarEvent: CalendarEventTemplate
+	): Promise<CalendarEvent> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			return updateGoogleCalendarEvent(client, id, calendarEvent);
+		} catch (error) {
+			console.error(
+				`Could not update calendar event for key "${anonymizeKey(apiKey)}"`,
+				error.message
+			);
+			throw new ServerError(401, "Unauthorized");
+		}
+	}
+
+	public async deleteCalendarEvent({ apiKey }: Config, id: string): Promise<void> {
+		try {
+			const client = await getAuthorizedOAuth2Client(apiKey);
+			await deleteGoogleCalendarEvent(client, id);
+		} catch (error) {
+			console.error(
+				`Could not delete calendar event for key "${anonymizeKey(apiKey)}"`,
+				error.message
+			);
 			throw new ServerError(401, "Unauthorized");
 		}
 	}

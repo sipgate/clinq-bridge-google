@@ -1,8 +1,8 @@
 import { Contact, ContactTemplate, ContactUpdate, ServerError } from "@clinq/bridge";
-import { CalendarEvent } from "@clinq/bridge/dist/models";
+import { CalendarEvent, CalendarEventTemplate } from "@clinq/bridge/dist/models";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
-import { convertGoogleCalendarEntry } from "./calendar";
+import { convertCalendarEvent, convertGoogleCalendarEvent } from "./calendar";
 import { convertContactToGooglePerson, convertGooglePersonToContact } from "./contact";
 import parseEnvironment from "./parse-environment";
 
@@ -166,6 +166,7 @@ export async function getGoogleContacts(
 
 	return contacts;
 }
+
 export async function getGoogleCalendarEvents(auth: OAuth2Client): Promise<CalendarEvent[]> {
 	const {
 		data: { items }
@@ -173,7 +174,6 @@ export async function getGoogleCalendarEvents(auth: OAuth2Client): Promise<Calen
 		auth,
 		calendarId: "primary",
 		timeMin: new Date().toISOString(),
-		maxResults: 10,
 		singleEvents: true,
 		orderBy: "startTime"
 	});
@@ -182,5 +182,41 @@ export async function getGoogleCalendarEvents(auth: OAuth2Client): Promise<Calen
 		return [];
 	}
 
-	return items.map(convertGoogleCalendarEntry);
+	return items.map(convertGoogleCalendarEvent);
+}
+
+export async function createGoogleCalendarEvent(
+	auth: OAuth2Client,
+	calendarEvent: CalendarEventTemplate
+): Promise<CalendarEvent> {
+	const { data } = await events.insert({
+		auth,
+		calendarId: "primary",
+		requestBody: convertCalendarEvent(calendarEvent)
+	});
+
+	return convertGoogleCalendarEvent(data);
+}
+
+export async function updateGoogleCalendarEvent(
+	auth: OAuth2Client,
+	id: string,
+	calendarEvent: CalendarEventTemplate
+): Promise<CalendarEvent> {
+	const { data } = await events.update({
+		auth,
+		eventId: id,
+		calendarId: "primary",
+		requestBody: convertCalendarEvent(calendarEvent)
+	});
+
+	return convertGoogleCalendarEvent(data);
+}
+
+export async function deleteGoogleCalendarEvent(auth: OAuth2Client, id: string): Promise<void> {
+	await events.delete({
+		auth,
+		calendarId: "primary",
+		eventId: id
+	});
 }
