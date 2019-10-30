@@ -2,6 +2,7 @@ import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
 import {
 	CalendarEvent,
 	CalendarEventTemplate,
+	CalendarFilterOptions,
 	ContactTemplate,
 	ContactUpdate
 } from "@clinq/bridge/dist/models";
@@ -98,10 +99,13 @@ class GoogleAdapter implements Adapter {
 		}
 	}
 
-	public async getCalendarEvents({ apiKey }: Config): Promise<CalendarEvent[]> {
+	public async getCalendarEvents(
+		{ apiKey }: Config,
+		options: CalendarFilterOptions
+	): Promise<CalendarEvent[]> {
 		try {
 			const client = await getAuthorizedOAuth2Client(apiKey);
-			return getGoogleCalendarEvents(client);
+			return getGoogleCalendarEvents(client, options);
 		} catch (error) {
 			console.error(
 				`Could not get calendar events for key "${anonymizeKey(apiKey)}"`,

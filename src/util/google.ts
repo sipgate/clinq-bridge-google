@@ -1,5 +1,9 @@
 import { Contact, ContactTemplate, ContactUpdate, ServerError } from "@clinq/bridge";
-import { CalendarEvent, CalendarEventTemplate } from "@clinq/bridge/dist/models";
+import {
+	CalendarEvent,
+	CalendarEventTemplate,
+	CalendarFilterOptions
+} from "@clinq/bridge/dist/models";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
 import { convertCalendarEvent, convertGoogleCalendarEvent } from "./calendar";
@@ -167,13 +171,17 @@ export async function getGoogleContacts(
 	return contacts;
 }
 
-export async function getGoogleCalendarEvents(auth: OAuth2Client): Promise<CalendarEvent[]> {
+export async function getGoogleCalendarEvents(
+	auth: OAuth2Client,
+	{ start, end }: CalendarFilterOptions
+): Promise<CalendarEvent[]> {
 	const {
 		data: { items }
 	} = await events.list({
 		auth,
 		calendarId: "primary",
-		timeMin: new Date().toISOString(),
+		timeMin: start ? new Date(start).toISOString() : undefined,
+		timeMax: end ? new Date(end).toISOString() : undefined,
 		singleEvents: true,
 		orderBy: "startTime"
 	});
