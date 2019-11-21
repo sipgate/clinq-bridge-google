@@ -7,7 +7,7 @@ import {
 } from "@clinq/bridge";
 import { people_v1 as People } from "googleapis";
 import { ContactName } from "./contact-name.model";
-import { GooglePhoneNumberLabel } from "./phonnumber-label.model";
+import { GooglePhoneNumberLabel } from "./phone-number-label.model";
 
 export function convertGooglePersonToContact(connection: People.Schema$Person): Contact | null {
 	const id = getGooglePersonResourceId(connection);
