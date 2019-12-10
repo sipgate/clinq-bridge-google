@@ -1,4 +1,4 @@
-runtime: nodejs
+runtime: nodejs12
 service: clinq-bridge-google
 
 env_variables:
