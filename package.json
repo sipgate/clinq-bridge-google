@@ -11,6 +11,7 @@
 		"start": "node dist/index.js",
 		"start:dev": "ts-node-dev src/index.ts",
 		"build": "tsc",
+		"gcp-build": "tsc",
 		"lint": "tslint --project tsconfig.json",
 		"env:encrypt": "gcloud kms encrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file .env.encrypted --plaintext-file .env",
 		"env:decrypt": "gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file .env.encrypted --plaintext-file .env"
