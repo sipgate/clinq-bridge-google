@@ -1,3 +1,7 @@
+import fs from "fs";
+
+const SECRETS_FILE = "secrets.json";
+
 export interface OAuth2Options {
 	clientId: string;
 	clientSecret: string;
@@ -6,11 +10,27 @@ export interface OAuth2Options {
 
 const {
 	GOOGLE_CLIENT_ID: clientId,
-	GOOGLE_CLIENT_SECRET: clientSecret,
+	GOOGLE_CLIENT_SECRET: clientSecretFromEnv,
 	GOOGLE_REDIRECT_URL: redirectUrl
 } = process.env;
 
+function readSecretFromFile(): string | null {
+	try {
+		const content = fs.readFileSync(SECRETS_FILE, { encoding: "utf8" });
+		const { GOOGLE_CLIENT_SECRET } = JSON.parse(content);
+		return GOOGLE_CLIENT_SECRET;
+	} catch {
+		return null;
+	}
+}
+
 export default function parseEnvironment(): OAuth2Options {
+	const clientSecretFromFile = readSecretFromFile();
+
+	console.log(clientSecretFromFile);
+
+	const clientSecret = clientSecretFromFile || clientSecretFromEnv;
+
 	if (!clientId) {
 		throw new Error("Missing client ID in environment.");
 	}
