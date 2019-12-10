@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const SECRETS_FILE = "secrets.json";
+const SECRETS_FILE = "./dist/secrets.json";
 
 export interface OAuth2Options {
 	clientId: string;
