@@ -15,5 +15,5 @@ jobs:
         with:
           version: "270.0.0"
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-          service_account_key: ${{ secrets.  }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
       - run: gcloud app deploy --project=integrations-174012 --version=$(git rev-parse --short HEAD)
