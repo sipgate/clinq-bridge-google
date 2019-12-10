@@ -27,8 +27,6 @@ function readSecretFromFile(): string | null {
 export default function parseEnvironment(): OAuth2Options {
 	const clientSecretFromFile = readSecretFromFile();
 
-	console.log(process.cwd());
-
 	const clientSecret = clientSecretFromFile || clientSecretFromEnv;
 
 	if (!clientId) {
