@@ -4,6 +4,9 @@
 	"private": true,
 	"description": "CLINQ-Bridge for Google Contacts.",
 	"main": "dist/index.js",
+	"files": [
+		"dist/**"
+	],
 	"repository": "git@github.com:sipgate/clinq-bridge-google.git",
 	"author": "Felix Gladisch <felix@felixgladisch.de>",
 	"license": "Apache-2.0",
@@ -12,6 +15,7 @@
 		"start": "node dist/index",
 		"start:dev": "ts-node-dev src/index.ts",
 		"build": "tsc && yarn secrets:decrypt",
+		"gcp-build": "yarn build",
 		"lint": "tslint --project tsconfig.json",
 		"secrets:encrypt": "gcloud kms encrypt --location global --keyring clinq-bridge-google --key prod --plaintext-file secrets.json --ciphertext-file secrets.json.encrypted",
 		"secrets:decrypt": "gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file secrets.json.encrypted --plaintext-file dist/secrets.json"
