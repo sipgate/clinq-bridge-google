@@ -22,10 +22,9 @@ const PERSON_FIELDS_GET = "metadata,names,emailAddresses,organizations,phoneNumb
 const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
 const PAGE_SIZE = 100;
 
-const { clientId, clientSecret, redirectUrl } = parseEnvironment();
-
 export function getOAuth2Client(): OAuth2Client {
-	return new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
+	const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } = parseEnvironment();
+	return new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 }
 
 export async function getAuthorizedOAuth2Client(apiKey: string): Promise<OAuth2Client> {

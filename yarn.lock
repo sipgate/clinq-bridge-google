@@ -18,10 +18,10 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@clinq/bridge@^11.0.0":
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-11.0.0.tgz#8ee0d4b115abdf4ed83d33c8babf3116209dbaea"
-  integrity sha512-ixG9HcSqXdJ/sUEj7aNt5yHTw9YyhtT3guHqrtA1BE7Fw8DI51MPinBF0fvcoxSmmLI/qXYHr8MuKtWvGSDW1Q==
+"@clinq/bridge@^11.1.1":
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-11.1.1.tgz#a8bcca53ab7561d5fe5b1ef2728c4faaf6cacaa0"
+  integrity sha512-yd49xIBhpiL13LxFNBddViFE7Pp2PCDCo9xhcON9jY8HGcjSXllo21hOdDzgG5db/h8vsXnIHJA0+hPHhgecTQ==
   dependencies:
     ajv "^6.10.0"
     axios "^0.19.0"
@@ -399,6 +399,11 @@ diff@^3.1.0, diff@^3.2.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
 double-ended-queue@^2.1.0-0:
   version "2.1.0-0"

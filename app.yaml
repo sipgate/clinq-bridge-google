@@ -1,5 +1,6 @@
 runtime: nodejs12
 service: clinq-bridge-google
+entrypoint: node dist/index.js
 
 env_variables:
   OAUTH_IDENTIFIER: "GOOGLE"

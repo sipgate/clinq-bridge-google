@@ -1,49 +1,27 @@
-import fs from "fs";
-
-const SECRETS_FILE = "./dist/secrets.json";
-
 export interface OAuth2Options {
-	clientId: string;
-	clientSecret: string;
-	redirectUrl: string;
-}
-
-const {
-	GOOGLE_CLIENT_ID: clientId,
-	GOOGLE_CLIENT_SECRET: clientSecretFromEnv,
-	GOOGLE_REDIRECT_URL: redirectUrl
-} = process.env;
-
-function readSecretFromFile(): string | null {
-	try {
-		const content = fs.readFileSync(SECRETS_FILE, { encoding: "utf8" });
-		const { GOOGLE_CLIENT_SECRET } = JSON.parse(content);
-		return GOOGLE_CLIENT_SECRET;
-	} catch {
-		return null;
-	}
+	GOOGLE_CLIENT_ID: string;
+	GOOGLE_CLIENT_SECRET: string;
+	GOOGLE_REDIRECT_URL: string;
 }
 
 export default function parseEnvironment(): OAuth2Options {
-	const clientSecretFromFile = readSecretFromFile();
+	const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } = process.env;
 
-	const clientSecret = clientSecretFromFile || clientSecretFromEnv;
-
-	if (!clientId) {
+	if (!GOOGLE_CLIENT_ID) {
 		throw new Error("Missing client ID in environment.");
 	}
 
-	if (!clientSecret) {
+	if (!GOOGLE_CLIENT_SECRET) {
 		throw new Error("Missing client secret in environment.");
 	}
 
-	if (!redirectUrl) {
+	if (!GOOGLE_REDIRECT_URL) {
 		throw new Error("Missing redirect URI in environment.");
 	}
 
 	return {
-		clientId,
-		clientSecret,
-		redirectUrl
+		GOOGLE_CLIENT_ID,
+		GOOGLE_CLIENT_SECRET,
+		GOOGLE_REDIRECT_URL
 	};
 }

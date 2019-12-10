@@ -1,11 +1,16 @@
-import { Adapter, Config, Contact, ServerError, start } from "@clinq/bridge";
 import {
+	Adapter,
 	CalendarEvent,
 	CalendarEventTemplate,
 	CalendarFilterOptions,
+	Config,
+	Contact,
 	ContactTemplate,
-	ContactUpdate
-} from "@clinq/bridge/dist/models";
+	ContactUpdate,
+	ServerError,
+	start
+} from "@clinq/bridge";
+import dotenv from "dotenv";
 import { Request } from "express";
 import {
 	createGoogleCalendarEvent,
@@ -21,6 +26,8 @@ import {
 	updateGoogleContact
 } from "./util";
 import { anonymizeKey } from "./util/anonymize-key";
+
+dotenv.config();
 
 class GoogleAdapter implements Adapter {
 	public async getContacts({ apiKey }: Config): Promise<Contact[]> {

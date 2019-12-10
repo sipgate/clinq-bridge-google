@@ -12,5 +12,4 @@ yarn-error.log
 #TypeScript
 dist/
 
-env.sh
-secrets.json
+.env
