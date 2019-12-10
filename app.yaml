@@ -2,5 +2,12 @@ runtime: nodejs
 service: clinq-bridge-google
 env: flex
 
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
 network:
   name: default
