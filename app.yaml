@@ -2,7 +2,7 @@ runtime: nodejs
 service: clinq-bridge-google
 
 env_variables:
-  - OAUTH_IDENTIFIER: "GOOGLE"
-  - GOOGLE_CLIENT_ID: "1091303799307-q6labaufl3d2sa48sa5kk5bbeb4b6a8k.apps.googleusercontent.com"
-  - GOOGLE_REDIRECT_URL: "https://google.bridge.clinq.com/oauth2/callback"
-  - USE_MEMORY_CACHE: true
+  OAUTH_IDENTIFIER: "GOOGLE"
+  GOOGLE_CLIENT_ID: "1091303799307-q6labaufl3d2sa48sa5kk5bbeb4b6a8k.apps.googleusercontent.com"
+  GOOGLE_REDIRECT_URL: "https://google.bridge.clinq.com/oauth2/callback"
+  USE_MEMORY_CACHE: true
