@@ -13,4 +13,3 @@ yarn-error.log
 dist/
 
 env.sh
-secrets.json

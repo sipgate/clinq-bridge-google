@@ -14,11 +14,11 @@
 		"postinstall": "tsc",
 		"start": "node dist/index",
 		"start:dev": "ts-node-dev src/index.ts",
-		"build": "tsc && yarn secrets:decrypt",
-		"gcp-build": "yarn build",
+		"build": "tsc",
+		"gcp-build": "tsc && mv secrets.json dist",
 		"lint": "tslint --project tsconfig.json",
 		"secrets:encrypt": "gcloud kms encrypt --location global --keyring clinq-bridge-google --key prod --plaintext-file secrets.json --ciphertext-file secrets.json.encrypted",
-		"secrets:decrypt": "gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file secrets.json.encrypted --plaintext-file dist/secrets.json"
+		"secrets:decrypt": "gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file secrets.json.encrypted --plaintext-file secrets.json"
 	},
 	"dependencies": {
 		"@clinq/bridge": "^11.0.0",
