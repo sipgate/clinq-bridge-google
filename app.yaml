@@ -1,3 +1,6 @@
 runtime: nodejs
 service: clinq-bridge-google
 env: flex
+
+network:
+  name: default
