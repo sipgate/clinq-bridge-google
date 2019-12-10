@@ -16,5 +16,5 @@ jobs:
           version: "270.0.0"
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-      - run: gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file secrets.json.encrypted --plaintext-file secrets.json
+      - run: gcloud kms decrypt --project integrations-174012 --location global --keyring clinq-bridge-google --key prod --ciphertext-file secrets.json.encrypted --plaintext-file secrets.json
       - run: gcloud app deploy --project=integrations-174012 --version=$(git rev-parse --short HEAD)
