@@ -1,4 +1,4 @@
-runtime: nodejs12
+runtime: nodejs
 service: clinq-bridge-google
 entrypoint: node dist/index.js
 env: flex
