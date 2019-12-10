@@ -8,7 +8,6 @@
 	"author": "Felix Gladisch <felix@felixgladisch.de>",
 	"license": "Apache-2.0",
 	"scripts": {
-		"postinstall": "tsc",
 		"start": "ts-node-dev src/index.ts",
 		"build": "tsc",
 		"lint": "tslint --project tsconfig.json",
