@@ -10,4 +10,4 @@ liveness_check:
   success_threshold: 2
 
 network:
-  name: projects/integrations-174012/global/networks/default
+  name: default
