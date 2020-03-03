@@ -1,9 +1,12 @@
-import { Contact, ContactTemplate, ContactUpdate, ServerError } from "@clinq/bridge";
 import {
 	CalendarEvent,
 	CalendarEventTemplate,
-	CalendarFilterOptions
-} from "@clinq/bridge/dist/models";
+	CalendarFilterOptions,
+	Contact,
+	ContactTemplate,
+	ContactUpdate,
+	ServerError
+} from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library";
 import { google, people_v1 as People } from "googleapis";
 import { convertCalendarEvent, convertGoogleCalendarEvent } from "./calendar";
@@ -18,6 +21,7 @@ const GOOGLE_CONTACTS_SCOPES = [
 	// Needs to be verified, before it can be added:
 	// "https://www.googleapis.com/auth/calendar"
 ];
+
 const RESOURCE_NAME = "people/me";
 const PERSON_FIELDS_GET = "metadata,names,emailAddresses,organizations,phoneNumbers,photos";
 const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
@@ -171,60 +175,60 @@ export async function getGoogleContacts(
 	return contacts;
 }
 
-// export async function getGoogleCalendarEvents(
-// 	auth: OAuth2Client,
-// 	{ start, end }: CalendarFilterOptions
-// ): Promise<CalendarEvent[]> {
-// 	const {
-// 		data: { items }
-// 	} = await events.list({
-// 		auth,
-// 		calendarId: "primary",
-// 		timeMin: start ? new Date(start).toISOString() : undefined,
-// 		timeMax: end ? new Date(end).toISOString() : undefined,
-// 		singleEvents: true,
-// 		orderBy: "startTime"
-// 	});
+export async function getGoogleCalendarEvents(
+	auth: OAuth2Client,
+	{ start, end }: CalendarFilterOptions
+): Promise<CalendarEvent[]> {
+	const {
+		data: { items }
+	} = await events.list({
+		auth,
+		calendarId: "primary",
+		timeMin: start ? new Date(start).toISOString() : undefined,
+		timeMax: end ? new Date(end).toISOString() : undefined,
+		singleEvents: true,
+		orderBy: "startTime"
+	});
 
-// 	if (!items) {
-// 		return [];
-// 	}
+	if (!items) {
+		return [];
+	}
 
-// 	return items.map(convertGoogleCalendarEvent);
-// }
+	return items.map(convertGoogleCalendarEvent);
+}
 
-// export async function createGoogleCalendarEvent(
-// 	auth: OAuth2Client,
-// 	calendarEvent: CalendarEventTemplate
-// ): Promise<CalendarEvent> {
-// 	const { data } = await events.insert({
-// 		auth,
-// 		calendarId: "primary",
-// 		requestBody: convertCalendarEvent(calendarEvent)
-// 	});
+export async function createGoogleCalendarEvent(
+	auth: OAuth2Client,
+	calendarEvent: CalendarEventTemplate
+): Promise<CalendarEvent> {
+	const { data } = await events.insert({
+		auth,
+		calendarId: "primary",
+		requestBody: convertCalendarEvent(calendarEvent)
+	});
 
-// 	return convertGoogleCalendarEvent(data);
-// }
+	return convertGoogleCalendarEvent(data);
+}
 
-// export async function updateGoogleCalendarEvent(
-// 	auth: OAuth2Client,
-// 	id: string,
-// 	calendarEvent: CalendarEventTemplate
-// ): Promise<CalendarEvent> {
-// 	const { data } = await events.update({
-// 		auth,
-// 		eventId: id,
-// 		calendarId: "primary",
-// 		requestBody: convertCalendarEvent(calendarEvent)
-// 	});
+export async function updateGoogleCalendarEvent(
+	auth: OAuth2Client,
+	id: string,
+	calendarEvent: CalendarEventTemplate
+): Promise<CalendarEvent> {
+	const { data } = await events.update({
+		auth,
+		eventId: id,
+		calendarId: "primary",
+		requestBody: convertCalendarEvent(calendarEvent)
+	});
 
-// 	return convertGoogleCalendarEvent(data);
-// }
+	return convertGoogleCalendarEvent(data);
+}
 
-// export async function deleteGoogleCalendarEvent(auth: OAuth2Client, id: string): Promise<void> {
-// 	await events.delete({
-// 		auth,
-// 		calendarId: "primary",
-// 		eventId: id
-// 	});
-// }
+export async function deleteGoogleCalendarEvent(auth: OAuth2Client, id: string): Promise<void> {
+	await events.delete({
+		auth,
+		calendarId: "primary",
+		eventId: id
+	});
+}
