@@ -8,13 +8,11 @@
 	"author": "Felix Gladisch <felix@felixgladisch.de>",
 	"license": "Apache-2.0",
 	"scripts": {
+		"postinstall": "tsc",
 		"start": "node dist/index.js",
 		"start:dev": "ts-node-dev src/index.ts",
 		"build": "tsc",
-		"gcp-build": "tsc",
-		"lint": "tslint --project tsconfig.json",
-		"env:encrypt": "gcloud kms encrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file .env.encrypted --plaintext-file .env",
-		"env:decrypt": "gcloud kms decrypt --location global --keyring clinq-bridge-google --key prod --ciphertext-file .env.encrypted --plaintext-file .env"
+		"lint": "tslint --project tsconfig.json"
 	},
 	"dependencies": {
 		"@clinq/bridge": "^11.1.2",
