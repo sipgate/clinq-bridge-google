@@ -22,6 +22,6 @@ steps:
     env:
       - "DEBUG=true"
       - "CLOUDSDK_COMPUTE_ZONE=europe-west3"
-      - "CLOUDSDK_CONTAINER_CLUSTER=sipgate-ai-services-cluster"
+      - "CLOUDSDK_CONTAINER_CLUSTER=clinq-services-cluster"
       - "APP=$REPO_NAME"
       - "IMAGE=eu.gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA"
