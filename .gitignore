@@ -13,3 +13,4 @@ yarn.lock
 dist/
 
 .env
+k8s/secrets.yml

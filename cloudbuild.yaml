@@ -1,0 +1,28 @@
+steps:
+  - id: docker-build
+    name: "gcr.io/kaniko-project/executor:latest"
+    args:
+      [
+        "--destination=eu.gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA",
+        "--destination=eu.gcr.io/$PROJECT_ID/$REPO_NAME:latest",
+        "--cache=true",
+        "--cache-ttl=720h",
+        "--build-arg",
+      ]
+
+  - id: kubernetes-apply
+    name: "eu.gcr.io/$PROJECT_ID/kustomize"
+    waitFor: ["docker-build"]
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        gcloud container clusters get-credentials --zone "$$CLOUDSDK_COMPUTE_ZONE" "$$CLOUDSDK_CONTAINER_CLUSTER"
+        kubectl kustomize k8s | envsubst | kubectl apply -f -
+        kubectl rollout status deployment/$REPO_NAME
+    env:
+      - "DEBUG=true"
+      - "CLOUDSDK_COMPUTE_ZONE=europe-west3"
+      - "CLOUDSDK_CONTAINER_CLUSTER=sipgate-ai-services-cluster"
+      - "APP=$REPO_NAME"
+      - "IMAGE=eu.gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA"

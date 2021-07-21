@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $APP
+  labels:
+    app: $APP
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: $APP
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: $APP
+    spec:
+      volumes:
+        - name: service-account
+          secret:
+            secretName: service-account
+      containers:
+        - name: $APP
+          image: $IMAGE
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: service-account
+              mountPath: /var/secrets/service-account
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 200m
+              memory: 400Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 8080
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 8080
+          env:
+            - name: REDIS_URL
+              value: redis://10.237.97.227
+            - name: GOOGLE_REDIRECT_URL
+              value: https://google.bridge.clinq.com/oauth2/callback
+            - name: OAUTH_IDENTIFIER
+              value: GOOGLE
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: clinq-bridge-google
+                  key: google-client-id
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: clinq-bridge-google
+                  key: google-client-secret
