@@ -19,17 +19,10 @@ spec:
       labels:
         app: $APP
     spec:
-      volumes:
-        - name: service-account
-          secret:
-            secretName: service-account
       containers:
         - name: $APP
           image: $IMAGE
           imagePullPolicy: IfNotPresent
-          volumeMounts:
-            - name: service-account
-              mountPath: /var/secrets/service-account
           resources:
             requests:
               cpu: 100m
