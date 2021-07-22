@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json .
 COPY src .
 COPY tsconfig.json .
-RUN npm i --quiet
+RUN npm install --quiet
 
 FROM node:16
 ENV NODE_ENV=production
@@ -14,7 +14,7 @@ WORKDIR /usr/src/app
 COPY package*.json .
 COPY src .
 COPY tsconfig.json .
-RUN npm ci --quiet
+RUN npm install --quiet --production
 COPY --from=builder /usr/src/app/dist/ dist/
 USER node
 EXPOSE 8080
