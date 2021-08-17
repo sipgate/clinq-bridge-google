@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - google.bridge.clinq.com
-      secretName: clinq-bridge-google-tls
+        - $DOMAIN
+      secretName: $APP-tls
   rules:
-    - host: google.bridge.clinq.com
+    - host: $DOMAIN
     - http:
         paths:
           - path: /
