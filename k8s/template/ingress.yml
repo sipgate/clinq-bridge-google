@@ -15,7 +15,7 @@ spec:
       secretName: $APP-tls
   rules:
     - host: $DOMAIN
-    - http:
+      http:
         paths:
           - path: /
             pathType: Prefix
