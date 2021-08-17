@@ -9,19 +9,17 @@ steps:
         "--cache-ttl=720h",
       ]
 
-  - id: kubernetes-apply
-    name: "eu.gcr.io/$PROJECT_ID/kustomize"
+  - id: kubernetes-image
     waitFor: ["docker-build"]
-    entrypoint: bash
+    name: "gcr.io/cloud-builders/kubectl"
     args:
-      - "-c"
-      - |
-        gcloud container clusters get-credentials --zone "$$CLOUDSDK_COMPUTE_ZONE" "$$CLOUDSDK_CONTAINER_CLUSTER"
-        kubectl kustomize k8s | envsubst | kubectl apply -f -
-        kubectl rollout status deployment/$REPO_NAME
+      [
+        "set",
+        "image",
+        "deployment",
+        "$REPO_NAME",
+        "$REPO_NAME=eu.gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA",
+      ]
     env:
-      - "DEBUG=true"
       - "CLOUDSDK_COMPUTE_ZONE=europe-west3"
       - "CLOUDSDK_CONTAINER_CLUSTER=clinq-services-cluster"
-      - "APP=$REPO_NAME"
-      - "IMAGE=eu.gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA"
