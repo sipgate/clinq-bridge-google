@@ -3,7 +3,7 @@
 
 FROM node:16 AS builder
 WORKDIR /usr/src/app
-COPY package*.json .
+COPY package*.json ./
 COPY src .
 COPY tsconfig.json .
 RUN npm install --quiet
@@ -11,7 +11,7 @@ RUN npm install --quiet
 FROM node:16
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
-COPY package*.json .
+COPY package*.json ./
 RUN npm install --quiet --production
 COPY --from=builder /usr/src/app/dist/ dist/
 USER node
