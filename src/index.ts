@@ -4,6 +4,7 @@ import {
   Contact,
   ContactTemplate,
   ContactUpdate,
+  OAuthURLConfig,
   ServerError,
   start,
 } from "@clinq/bridge";
@@ -177,15 +178,18 @@ class GoogleAdapter implements Adapter {
   // 	}
   // }
 
-  public async getOAuth2RedirectUrl(): Promise<string> {
-    return getOAuth2RedirectUrl();
+  public async getOAuth2RedirectUrl(
+    urlConfig?: OAuthURLConfig | undefined
+  ): Promise<string> {
+    return getOAuth2RedirectUrl(urlConfig);
   }
 
   public async handleOAuth2Callback(
-    req: Request
+    req: Request,
+    isClinqBeta: boolean
   ): Promise<{ apiKey: string; apiUrl: string }> {
     const { code } = req.query;
-    const client = getOAuth2Client();
+    const client = getOAuth2Client(isClinqBeta);
     const {
       tokens: { access_token, refresh_token },
     } = await client.getToken(code);

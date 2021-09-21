@@ -5,6 +5,7 @@ import {
   Contact,
   ContactTemplate,
   ContactUpdate,
+  OAuthURLConfig,
   ServerError,
 } from "@clinq/bridge";
 import { OAuth2Client } from "google-auth-library";
@@ -15,6 +16,7 @@ import {
   convertGooglePersonToContact,
 } from "./contact";
 import parseEnvironment from "./parse-environment";
+import { GenerateAuthUrlOpts } from "google-auth-library/build/src/auth/oauth2client";
 
 const { people: PeopleAPI } = google.people("v1");
 const { events } = google.calendar("v3");
@@ -31,13 +33,19 @@ const PERSON_FIELDS_GET =
 const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
 const PAGE_SIZE = 100;
 
-export function getOAuth2Client(): OAuth2Client {
+export function getOAuth2Client(isClinqBeta = false): OAuth2Client {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } =
     parseEnvironment();
+  let redirectUrl = GOOGLE_REDIRECT_URL;
+
+  if (isClinqBeta) {
+    redirectUrl += "?clinq_beta=true";
+  }
+
   return new google.auth.OAuth2(
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URL
+    redirectUrl
   );
 }
 
@@ -60,13 +68,22 @@ export async function getAuthorizedOAuth2Client(
   return client;
 }
 
-export function getOAuth2RedirectUrl(): string {
-  const client = getOAuth2Client();
-  return client.generateAuthUrl({
+export function getOAuth2RedirectUrl(
+  urlConfig?: OAuthURLConfig | undefined
+): string {
+  const isClinqBeta = urlConfig && urlConfig.clinqBeta !== null;
+
+  const client = getOAuth2Client(isClinqBeta);
+  const { GOOGLE_REDIRECT_URL } = process.env;
+  const opts: GenerateAuthUrlOpts = {
     access_type: "offline",
     scope: GOOGLE_CONTACTS_SCOPES,
     prompt: "consent",
-  });
+  };
+  if (urlConfig && isClinqBeta) {
+    opts.redirect_uri = `${GOOGLE_REDIRECT_URL}?clinq_beta=${urlConfig.clinqBeta}`;
+  }
+  return client.generateAuthUrl(opts);
 }
 
 export async function deleteGoogleContact(
@@ -155,7 +172,7 @@ export async function createGoogleContact(
 
 export async function getGoogleContacts(
   client: OAuth2Client,
-  retrievedItems: number = 0,
+  retrievedItems = 0,
   token?: string,
   previousContacts?: Contact[]
 ): Promise<Contact[]> {
