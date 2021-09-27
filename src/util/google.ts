@@ -71,7 +71,7 @@ export async function getAuthorizedOAuth2Client(
 export function getOAuth2RedirectUrl(
   urlConfig?: OAuthURLConfig | undefined
 ): string {
-  const isClinqBeta = urlConfig && urlConfig.clinqBeta !== null;
+  const isClinqBeta = urlConfig && urlConfig.clinqBeta === true;
 
   const client = getOAuth2Client(isClinqBeta);
   const { GOOGLE_REDIRECT_URL } = process.env;
