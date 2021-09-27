@@ -15,3 +15,6 @@ dist/
 .env
 k8s/secrets.yml
 k8s/prod.yml
+
+#MacOS
+.DS_Store
