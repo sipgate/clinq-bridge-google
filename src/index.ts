@@ -1,5 +1,6 @@
 import {
   Adapter,
+  ClinqBetaEnvironment,
   Config,
   Contact,
   ContactTemplate,
@@ -186,10 +187,10 @@ class GoogleAdapter implements Adapter {
 
   public async handleOAuth2Callback(
     req: Request,
-    isClinqBeta: boolean
+    clinqEnvironment?: ClinqBetaEnvironment
   ): Promise<{ apiKey: string; apiUrl: string }> {
     const { code } = req.query;
-    const client = getOAuth2Client(isClinqBeta);
+    const client = getOAuth2Client(clinqEnvironment);
     const {
       tokens: { access_token, refresh_token },
     } = await client.getToken(code);

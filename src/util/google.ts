@@ -2,6 +2,7 @@ import {
   CalendarEvent,
   CalendarEventTemplate,
   CalendarFilterOptions,
+  ClinqBetaEnvironment,
   Contact,
   ContactTemplate,
   ContactUpdate,
@@ -33,13 +34,15 @@ const PERSON_FIELDS_GET =
 const PERSON_FIELDS_UPDATE = "names,emailAddresses,organizations,phoneNumbers";
 const PAGE_SIZE = 100;
 
-export function getOAuth2Client(isClinqBeta = false): OAuth2Client {
+export function getOAuth2Client(
+  clinqEnvironment?: ClinqBetaEnvironment
+): OAuth2Client {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } =
     parseEnvironment();
   let redirectUrl = GOOGLE_REDIRECT_URL;
 
-  if (isClinqBeta) {
-    redirectUrl += "?clinq_beta=true";
+  if (clinqEnvironment) {
+    redirectUrl += `?clinq_environment=${clinqEnvironment}`;
   }
 
   return new google.auth.OAuth2(
@@ -71,17 +74,17 @@ export async function getAuthorizedOAuth2Client(
 export function getOAuth2RedirectUrl(
   urlConfig?: OAuthURLConfig | undefined
 ): string {
-  const isClinqBeta = urlConfig && urlConfig.clinqBeta === true;
+  const clinqEnvironment = urlConfig && urlConfig.clinqEnvironment;
 
-  const client = getOAuth2Client(isClinqBeta);
+  const client = getOAuth2Client(clinqEnvironment);
   const { GOOGLE_REDIRECT_URL } = process.env;
   const opts: GenerateAuthUrlOpts = {
     access_type: "offline",
     scope: GOOGLE_CONTACTS_SCOPES,
     prompt: "consent",
   };
-  if (urlConfig && isClinqBeta) {
-    opts.redirect_uri = `${GOOGLE_REDIRECT_URL}?clinq_beta=${urlConfig.clinqBeta}`;
+  if (urlConfig && clinqEnvironment) {
+    opts.redirect_uri = `${GOOGLE_REDIRECT_URL}?clinq_environment=${clinqEnvironment}`;
   }
   return client.generateAuthUrl(opts);
 }
