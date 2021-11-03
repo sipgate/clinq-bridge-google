@@ -42,7 +42,7 @@ export function getOAuth2Client(
   let redirectUrl = GOOGLE_REDIRECT_URL;
 
   if (clinqEnvironment) {
-    redirectUrl += `?clinq_environment=${clinqEnvironment}`;
+    redirectUrl += `/clinq-environment/${clinqEnvironment}`;
   }
 
   return new google.auth.OAuth2(
@@ -83,8 +83,8 @@ export function getOAuth2RedirectUrl(
     scope: GOOGLE_CONTACTS_SCOPES,
     prompt: "consent",
   };
-  if (urlConfig && clinqEnvironment) {
-    opts.redirect_uri = `${GOOGLE_REDIRECT_URL}?clinq_environment=${clinqEnvironment}`;
+  if (clinqEnvironment) {
+    opts.redirect_uri = `${GOOGLE_REDIRECT_URL}/clinq-environment/${clinqEnvironment}`;
   }
   return client.generateAuthUrl(opts);
 }
