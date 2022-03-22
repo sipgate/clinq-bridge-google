@@ -2,9 +2,10 @@
 
 set -e
 
+export PROJECT_ID="clinq-services"
 export GITHUB_SHA=$(git rev-parse --short HEAD)
 export APP="clinq-bridge-google"
-export IMAGE="eu.gcr.io/integrations-174012/$APP:latest"
+export IMAGE="eu.gcr.io/$PROJECT_ID/$APP:latest"
 export DOMAIN="google.bridge.clinq.com"
 
 kubectl kustomize k8s/template | envsubst > k8s/prod.yml

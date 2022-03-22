@@ -44,7 +44,7 @@ spec:
               port: 8080
           env:
             - name: REDIS_URL
-              value: rediss://10.102.0.11:6378
+              value: redis://clinq-cache-redis-master.redis.svc.cluster.local
             - name: GOOGLE_REDIRECT_URL
               value: https://google.bridge.clinq.com/oauth2/callback
             - name: OAUTH_IDENTIFIER
@@ -53,9 +53,9 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: clinq-bridge-google
-                  key: google-client-id
+                  key: googleClientId
             - name: GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: clinq-bridge-google
-                  key: google-client-secret
+                  key: googleClientSecret
