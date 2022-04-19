@@ -15,7 +15,7 @@
     "lint": "eslint 'src/**/*.ts' --fix"
   },
   "dependencies": {
-    "@clinq/bridge": "^11.8.4",
+    "@clinq/bridge": "^11.8.5",
     "dotenv": "^8.2.0",
     "googleapis": "^39.2.0",
     "husky": "^7.0.2"
