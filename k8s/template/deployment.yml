@@ -46,16 +46,16 @@ spec:
             - name: REDIS_URL
               value: rediss://10.37.248.211:6378
             - name: GOOGLE_REDIRECT_URL
-              value: https://google.bridge.clinq.com/oauth2/callback
+              value: $REDIRECT_URI
             - name: OAUTH_IDENTIFIER
               value: GOOGLE
             - name: GOOGLE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: clinq-bridge-google
+                  name: $GOOGLE_SECRET_NAME
                   key: googleClientId
             - name: GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: clinq-bridge-google
+                  name: $GOOGLE_SECRET_NAME
                   key: googleClientSecret
